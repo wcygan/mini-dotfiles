@@ -40,16 +40,43 @@ else
 fi
 STATE_DIR="${_STATE_BASE}/mini-dotfiles"
 
+# Color + emoji logging ------------------------------------------------------
+# Disable with NO_COLOR=1 or when not a TTY.
+_enable_color=false
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  if command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
+    _enable_color=true
+  fi
+fi
+
+if $_enable_color; then
+  C_RESET="$(tput sgr0)"
+  C_BOLD="$(tput bold)"
+  C_RED="$(tput setaf 1)"
+  C_GREEN="$(tput setaf 2)"
+  C_YELLOW="$(tput setaf 3)"
+  C_BLUE="$(tput setaf 4)"
+  C_MAGENTA="$(tput setaf 5)"
+  C_CYAN="$(tput setaf 6)"
+else
+  C_RESET=""; C_BOLD=""; C_RED=""; C_GREEN=""; C_YELLOW=""; C_BLUE=""; C_MAGENTA=""; C_CYAN=""
+fi
+
+EMOJI_INFO="ℹ️"; EMOJI_WARN="⚠️"; EMOJI_ERROR="❌"; EMOJI_OK="✅"; EMOJI_RUN="▶️"
+
 log() { printf "%s\n" "$*"; }
-info() { printf "[INFO] %s\n" "$*"; }
-warn() { printf "[WARN] %s\n" "$*" 1>&2; }
-err()  { printf "[ERROR] %s\n" "$*" 1>&2; }
+info() { printf "%s%s %s[INFO]%s %s\n" "$C_BLUE" "$EMOJI_INFO" "$C_BOLD" "$C_RESET" "$*"; }
+warn() { printf "%s%s %s[WARN]%s %s\n" "$C_YELLOW" "$EMOJI_WARN" "$C_BOLD" "$C_RESET" "$*" 1>&2; }
+err()  { printf "%s%s %s[ERROR]%s %s\n" "$C_RED" "$EMOJI_ERROR" "$C_BOLD" "$C_RESET" "$*" 1>&2; }
+ok()   { printf "%s%s %s[OK]%s %s\n" "$C_GREEN" "$EMOJI_OK" "$C_BOLD" "$C_RESET" "$*"; }
 
 run() {
   if $DRY_RUN; then
-    info "DRY-RUN: $*"
+    printf "%s🧪 %s[DRY-RUN]%s %s\n" "$C_MAGENTA" "$C_BOLD" "$C_RESET" "$*"
   else
-    $VERBOSE && info "RUN: $*"
+    if $VERBOSE; then
+      printf "%s%s %s[RUN]%s %s\n" "$C_CYAN" "$EMOJI_RUN" "$C_BOLD" "$C_RESET" "$*"
+    fi
     eval "$@"
   fi
 }
@@ -89,7 +116,7 @@ detect_platform() {
     fi
   fi
 
-  info "Detected OS: $OS; package manager: $PKG_MGR"
+  info "🧭 Detected OS: $OS; package manager: $PKG_MGR"
 }
 
 ##############################################################################
@@ -117,14 +144,14 @@ brew_update_if_needed() {
   case "$last" in (*[!0-9]*) last=0 ;; esac
   age=$(( now - last ))
   if [ "$age" -ge "$threshold" ] || [ "$last" -eq 0 ]; then
-    info "Homebrew present. Updating taps (last update: ${last:-never})."
+    info "🍺⬆️  Homebrew present. Updating taps (last update: ${last:-never})."
     run "brew update"
     # Write timestamp only when not a dry-run
     if ! $DRY_RUN; then
       run "printf '%s\n' '$now' > '$stamp_file'"
     fi
   else
-    info "Homebrew updated recently (<30 days); skipping brew update."
+    info "🍺⏭️  Homebrew updated recently (<30 days); skipping brew update."
   fi
 }
 
@@ -132,7 +159,7 @@ bootstrap_package_manager() {
   case "$PKG_MGR" in
     brew)
       if ! command -v brew >/dev/null 2>&1; then
-        info "Homebrew not found; installing..."
+        info "🍺 Homebrew not found; installing..."
         if confirm "Install Homebrew?"; then
           run "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
           # Ensure brew in PATH for current session (Apple Silicon + Intel)
@@ -151,17 +178,17 @@ bootstrap_package_manager() {
       fi
       ;;
     apt)
-      info "Updating apt and installing basics (git curl zsh)..."
+      info "📦 Updating apt and installing basics (git curl zsh)..."
       run "sudo apt-get update -y"
       run "sudo apt-get install -y git curl zsh"
       ;;
     dnf)
-      info "Updating dnf and installing basics (git curl zsh)..."
+      info "📦 Updating dnf and installing basics (git curl zsh)..."
       run "sudo dnf -y update --refresh"
       run "sudo dnf -y install git curl zsh"
       ;;
     *)
-      warn "No supported package manager detected; skipping bootstrap."
+      warn "🚫 No supported package manager detected; skipping bootstrap."
       ;;
   esac
 }
@@ -180,10 +207,10 @@ ensure_shell() {
   fi
 
   if [ -n "${preferred_shell}" ] && [ "$SHELL" != "$preferred_shell" ]; then
-    info "Default shell is $SHELL; preferred is $preferred_shell"
+    info "🐚 Default shell is $SHELL; preferred is $preferred_shell"
     if confirm "Change default shell to $preferred_shell for user $(whoami)?"; then
       if ! grep -q "$preferred_shell" /etc/shells 2>/dev/null; then
-        warn "$preferred_shell not in /etc/shells; attempting to add (requires sudo)."
+        warn "📄 $preferred_shell not in /etc/shells; attempting to add (requires sudo)."
         run "echo $preferred_shell | sudo tee -a /etc/shells >/dev/null"
       fi
       run "chsh -s $preferred_shell"
@@ -191,7 +218,7 @@ ensure_shell() {
       warn "Skipped changing default shell."
     fi
   else
-    info "Shell is already set to preferred or no alternative found."
+    info "✅ Shell is already set to preferred or no alternative found."
   fi
 }
 
@@ -209,7 +236,7 @@ backup_file() {
     local ts
     ts=$(date +%Y%m%d-%H%M%S)
     local backup="${target}.bak.${ts}"
-    warn "Backing up $target -> $backup"
+    warn "💾 Backing up $target -> $backup"
     run "mv -f '$target' '$backup'"
   fi
 }
@@ -219,21 +246,21 @@ link_file() {
   local src="$1"
   local dst="$2"
   if [ ! -e "$src" ]; then
-    warn "Source missing: $src (skipping)"
+    warn "❓ Source missing: $src (skipping)"
     return 0
   fi
   mkdir -p "$(dirname "$dst")"
   if [ -L "$dst" ] && [ "$(readlink "$dst" || true)" = "$src" ]; then
-    info "Link exists: $dst -> $src"
+    info "🔗 Link exists: $dst -> $src"
     return 0
   fi
   backup_file "$dst" "$src"
-  info "Linking $dst -> $src"
+  info "🔗 Linking $dst -> $src"
   run "ln -s '$src' '$dst'"
 }
 
 link_dotfiles() {
-  info "Linking basic dotfiles..."
+  info "🔗 Linking basic dotfiles..."
   link_file "${DOTFILES_DIR}/zshrc" "$HOME/.zshrc"
   link_file "${DOTFILES_DIR}/bashrc" "$HOME/.bashrc"
   link_file "${DOTFILES_DIR}/gitconfig" "$HOME/.gitconfig"
@@ -273,13 +300,13 @@ parse_args() {
 
 main() {
   parse_args "$@"
-  info "Starting mini-dotfiles installation"
-  info "Preamble: detect OS, bootstrap packages, set shell, link dotfiles."
+  info "🚀 Starting mini-dotfiles installation"
+  info "🧰 Preamble: detect OS, bootstrap packages, set shell, link dotfiles."
   detect_platform
   bootstrap_package_manager
   ensure_shell
   link_dotfiles
-  info "Done. You may restart your shell to apply changes."
+  ok "🎉 Done. You may restart your shell to apply changes."
 }
 
 main "$@"

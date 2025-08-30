@@ -52,6 +52,9 @@ Example preamble lines when automating or running commands:
   linking.
 - Interactivity: Ask before overwriting; offer `--yes` to bypass prompts when safe.
 - Logging: Echo clear steps; provide `--verbose` for debug output.
+- Logging: Echo clear steps; provide `--verbose` for debug output. Prefer
+  visual logs with color and emojis for clarity (respects `NO_COLOR` and falls
+  back to plain text when color is unavailable).
 - Idempotence: Check‑before‑install/link; avoid repeated work.
 - State outside git: Never write runtime state into the repo. Use a per-user
   state/cache directory (see `STATE_DIR`) for timestamps and caches; do not
