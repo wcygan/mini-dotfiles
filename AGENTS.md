@@ -109,12 +109,8 @@ Example preamble lines when automating or running commands:
 - Clean: `./clean.sh` to remove repo-managed symlinks created by `install.sh`
   (safe, idempotent; supports `--dry-run`, `--yes`, `--verbose`).
 - Terminal tools: `./install-terminal.sh` to install cross-platform terminal
-  utilities like starship. Installs a Nerd Font (JetBrains Mono Nerd Font)
-  for powerline glyphs, configures Starship with the Catppuccin Powerline
-  preset, skips when already installed, runs non-interactively, and logs with
-  the same visual style.
-  Note: `./install.sh` also invokes terminal tool installation automatically
-  as part of the single-entrypoint setup.
+  utilities like starship. Skips if already installed, runs non-interactively,
+  and logs with the same visual style.
 
 ##############################################################################
 # 07. Contribution Guide For Agents                                          #
