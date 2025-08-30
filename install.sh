@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+##############################################################################
+#   Filename: install.sh                                                     #
+# Maintainer: Will Cygan <wcygan.io@gmail.com>                               #
+#        URL: http://github.com/wcygan/mini-dotfiles                         #
+#                                                                            #
+# Sections:                                                                  #
+#   01. Preamble & Globals .... Flags, logging, helpers                      #
+#   02. OS Detection ........... Identify platform and package manager       #
+#   03. Package Bootstrap ...... Install/update base tools                   #
+#   04. Shell Setup ............ Preferred shell & chsh                      #
+#   05. Dotfiles Linking ....... Symlink with backups                        #
+#   06. CLI & Entry Point ...... Args, usage, and main                       #
+##############################################################################
+
+##############################################################################
+# 01. Preamble & Globals                                                     #
+##############################################################################
+
 set -euo pipefail
 
 # Globals
@@ -34,6 +52,10 @@ confirm() {
   esac
 }
 
+##############################################################################
+# 02. OS Detection                                                           #
+##############################################################################
+
 detect_platform() {
   local uname_s
   uname_s=$(uname -s)
@@ -57,6 +79,10 @@ detect_platform() {
 
   info "Detected OS: $OS; package manager: $PKG_MGR"
 }
+
+##############################################################################
+# 03. Package Bootstrap                                                      #
+##############################################################################
 
 bootstrap_package_manager() {
   case "$PKG_MGR" in
@@ -92,6 +118,10 @@ bootstrap_package_manager() {
   esac
 }
 
+##############################################################################
+# 04. Shell Setup                                                            #
+##############################################################################
+
 ensure_shell() {
   # Prefer zsh if available
   local preferred_shell
@@ -116,6 +146,10 @@ ensure_shell() {
     info "Shell is already set to preferred or no alternative found."
   fi
 }
+
+##############################################################################
+# 05. Dotfiles Linking                                                       #
+##############################################################################
 
 backup_file() {
   # backup_file <path>
@@ -157,6 +191,10 @@ link_dotfiles() {
   link_file "${DOTFILES_DIR}/gitconfig" "$HOME/.gitconfig"
 }
 
+##############################################################################
+# 06. CLI & Entry Point                                                      #
+##############################################################################
+
 usage() {
   cat <<EOF
 mini-dotfiles installer
@@ -187,6 +225,7 @@ parse_args() {
 main() {
   parse_args "$@"
   info "Starting mini-dotfiles installation"
+  info "Preamble: detect OS, bootstrap packages, set shell, link dotfiles."
   detect_platform
   bootstrap_package_manager
   ensure_shell
