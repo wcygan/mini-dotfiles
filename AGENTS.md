@@ -53,6 +53,9 @@ Example preamble lines when automating or running commands:
 - Interactivity: Ask before overwriting; offer `--yes` to bypass prompts when safe.
 - Logging: Echo clear steps; provide `--verbose` for debug output.
 - Idempotence: Check‑before‑install/link; avoid repeated work.
+- State outside git: Never write runtime state into the repo. Use a per-user
+  state/cache directory (see `STATE_DIR`) for timestamps and caches; do not
+  track these in git.
 
 ##############################################################################
 # 04. Implementation Notes                                                   #
@@ -66,6 +69,10 @@ Example preamble lines when automating or running commands:
 - Testing: Dry‑run mode (`--dry-run`) prints planned actions without changes.
 - Header pattern: Add banner + numbered section blocks to shell files to aid
   navigation and reviews.
+- State/cache directory: Scripts use `STATE_DIR`, resolved via XDG paths
+  (`$XDG_STATE_HOME` → `$XDG_CACHE_HOME` → `~/.local/state` → `~/.cache`). Use
+  this directory for ephemeral data (e.g., timestamps, caches). Keep it outside
+  the repository; do not add it to version control.
 
 ##############################################################################
 # 05. v1 Details (implemented)                                               #
@@ -77,6 +84,8 @@ Example preamble lines when automating or running commands:
     (skips `brew update` when the last update was <30 days ago).
   - Linux: Updates package index; installs `git`, `curl`, and `zsh` via `apt`
     or `dnf`.
+- State dir: Uses `STATE_DIR` for lightweight tracking (e.g., Homebrew update
+  timestamp). Lives outside the repo and is not tracked by git.
 - Shell setup: Prefers `zsh`; offers to `chsh` to the detected path if not
   default. Adds shell path to `/etc/shells` when needed.
 - Dotfile links: Symlinks minimal `~/.zshrc`, `~/.bashrc`, `~/.gitconfig`, and
