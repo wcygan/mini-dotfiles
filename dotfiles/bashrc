@@ -1,0 +1,18 @@
+# mini-dotfiles: bashrc (minimal, platform-agnostic)
+
+# Safety
+set -o noclobber
+
+# Paths
+export PATH="$HOME/.local/bin:$PATH"
+
+# Aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Less colors if available
+if command -v dircolors >/dev/null 2>&1; then
+  eval "$(dircolors -b)"
+fi
+

@@ -28,16 +28,31 @@
 **Implementation Notes**
 - **Script style:** POSIX-compatible where feasible; when not, keep bash-only features minimal and documented.
 - **Structure:**
-  - Entry point: `install.sh`. Helper scripts are organized in `scripts/`.
+  - A single `install.sh` orchestrates setup with small, well-named functions.
   - Keep per-platform logic gated in functions, not scattered conditionals.
 - **Extensibility:** Add optional components behind flags (e.g., `--dev`, `--desktop`).
 - **Testing:** Dry-run mode (`--dry-run`) prints planned actions without changing the system.
 
 **Roadmap**
-- **v0:** Minimal installer scaffolding (hello + skeleton) [current].
-- **v1:** OS detection, package manager bootstrap, shell setup, basic dotfile links.
-- **v2:** Optional profiles (dev/tools/desktop), font installs, terminal config.
-- **v3:** CI smoke checks, linting for shell scripts, integration tests.
+- **v0:** Minimal installer scaffolding (hello + skeleton) [done].
+- **v1:** OS detection, package manager bootstrap, shell setup, basic dotfile links. [done]
+- **v2:** Optional profiles (dev/tools/desktop), font installs, terminal config. [next]
+- **v3:** CI smoke checks, linting for shell scripts, integration tests. [later]
+
+**v1 Details (implemented)**
+- **OS detection:** `install.sh` identifies macOS vs Linux and selects `brew`, `apt`, or `dnf`.
+- **Package bootstrap:**
+  - macOS: Installs or updates Homebrew.
+  - Linux: Updates package index; installs `git`, `curl`, and `zsh` via `apt` or `dnf`.
+- **Shell setup:** Prefers `zsh`; offers to `chsh` to the detected path if not default. Adds shell path to `/etc/shells` when needed.
+- **Dotfile links:** Symlinks minimal `~/.zshrc`, `~/.bashrc`, and `~/.gitconfig` from `dotfiles/`, backing up existing files with timestamped `.bak.*` suffixes.
+- **Idempotence:** Skips re-linking when links already point to this repo; backups only when replacing real files.
+- **Flags:** `--yes`, `--dry-run`, `--verbose` support safe, transparent runs.
+
+**Usage Notes**
+- **Dry run:** `./install.sh --dry-run` to preview actions.
+- **Non-interactive:** Add `--yes` to suppress confirmations when safe.
+- **Verbose:** Use `--verbose` to print invoked commands.
 
 **Contribution Guide For Agents**
 - **Keep changes surgical:** Small, reviewable diffs; consistent naming.

@@ -1,0 +1,16 @@
+# mini-dotfiles: safe, generic gitconfig (no user identity)
+
+[color]
+  ui = auto
+
+[core]
+  editor = vi
+  autocrlf = input
+  excludesfile = ~/.gitignore_global
+
+[pull]
+  rebase = false
+
+[init]
+  defaultBranch = main
+

@@ -1,0 +1,31 @@
+# mini-dotfiles: zshrc (minimal, platform-agnostic)
+
+# History and completion
+HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
+HISTSIZE=5000
+SAVEHIST=5000
+setopt HIST_IGNORE_DUPS SHARE_HISTORY
+
+autoload -Uz compinit && compinit
+
+# Prompt (simple)
+PROMPT='%n@%m:%~ %# '
+
+# Aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Source bashrc if present for shared aliases
+if [ -f "$HOME/.bashrc" ]; then
+  source "$HOME/.bashrc"
+fi
+
+# Homebrew PATH (macOS) if available
+if [ -d "/opt/homebrew/bin" ]; then
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+fi
+if [ -d "/usr/local/bin" ]; then
+  export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+fi
+
