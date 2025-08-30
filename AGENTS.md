@@ -78,8 +78,9 @@ Example preamble lines when automating or running commands:
     or `dnf`.
 - Shell setup: Prefers `zsh`; offers to `chsh` to the detected path if not
   default. Adds shell path to `/etc/shells` when needed.
-- Dotfile links: Symlinks minimal `~/.zshrc`, `~/.bashrc`, and `~/.gitconfig`
-  from `dotfiles/`, backing up existing files with timestamped `.bak.*` suffixes.
+- Dotfile links: Symlinks minimal `~/.zshrc`, `~/.bashrc`, `~/.gitconfig`, and
+  `~/.aliases.sh` from `dotfiles/`, backing up existing files with timestamped
+  `.bak.*` suffixes.
 - Idempotence: Skips re‑linking when links already point to this repo; backups
   only when replacing real files.
 - Flags: `--yes`, `--dry-run`, `--verbose` support safe, transparent runs.
@@ -92,6 +93,8 @@ Example preamble lines when automating or running commands:
 - Dry run: `./install.sh --dry-run` to preview actions.
 - Non‑interactive: Add `--yes` to suppress confirmations when safe.
 - Verbose: Use `--verbose` to print invoked commands.
+- Clean: `./clean.sh` to remove repo-managed symlinks created by `install.sh`
+  (safe, idempotent; supports `--dry-run`, `--yes`, `--verbose`).
 
 ##############################################################################
 # 07. Contribution Guide For Agents                                          #

@@ -4,7 +4,7 @@
   ui = auto
 
 [core]
-  editor = vi
+	editor = vim
   autocrlf = input
   excludesfile = ~/.gitignore_global
 
@@ -14,3 +14,6 @@
 [init]
   defaultBranch = main
 
+[user]
+	name = Will Cygan
+	email = wcygan.io@gmail.com
