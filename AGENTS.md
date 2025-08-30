@@ -73,7 +73,8 @@ Example preamble lines when automating or running commands:
 - OS detection: `install.sh` identifies macOS vs Linux and selects `brew`,
   `apt`, or `dnf`.
 - Package bootstrap:
-  - macOS: Installs or updates Homebrew.
+  - macOS: Installs Homebrew if missing; updates taps at most monthly
+    (skips `brew update` when the last update was <30 days ago).
   - Linux: Updates package index; installs `git`, `curl`, and `zsh` via `apt`
     or `dnf`.
 - Shell setup: Prefers `zsh`; offers to `chsh` to the detected path if not

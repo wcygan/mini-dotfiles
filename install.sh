@@ -28,6 +28,18 @@ VERBOSE=false
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${SCRIPT_DIR}/dotfiles"
 
+# State directory (XDG-first)
+if [ -n "${XDG_STATE_HOME:-}" ]; then
+  _STATE_BASE="$XDG_STATE_HOME"
+elif [ -n "${XDG_CACHE_HOME:-}" ]; then
+  _STATE_BASE="$XDG_CACHE_HOME"
+elif [ -d "$HOME/.local/state" ] || [ ! -d "$HOME/.cache" ]; then
+  _STATE_BASE="$HOME/.local/state"
+else
+  _STATE_BASE="$HOME/.cache"
+fi
+STATE_DIR="${_STATE_BASE}/mini-dotfiles"
+
 log() { printf "%s\n" "$*"; }
 info() { printf "[INFO] %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*" 1>&2; }
@@ -84,6 +96,38 @@ detect_platform() {
 # 03. Package Bootstrap                                                      #
 ##############################################################################
 
+ensure_state_dir() {
+  # Ensure state dir exists (no-op in dry-run)
+  run "mkdir -p '$STATE_DIR'"
+}
+
+brew_update_if_needed() {
+  # Update Homebrew at most once every 30 days
+  local stamp_file now last threshold age
+  threshold=2592000 # 30 days in seconds
+  ensure_state_dir
+  stamp_file="$STATE_DIR/brew.update.ts"
+  now="$(date +%s)"
+  if [ -f "$stamp_file" ]; then
+    last="$(cat "$stamp_file" 2>/dev/null || echo 0)"
+  else
+    last=0
+  fi
+  # Fallback if non-numeric
+  case "$last" in (*[!0-9]*) last=0 ;; esac
+  age=$(( now - last ))
+  if [ "$age" -ge "$threshold" ] || [ "$last" -eq 0 ]; then
+    info "Homebrew present. Updating taps (last update: ${last:-never})."
+    run "brew update"
+    # Write timestamp only when not a dry-run
+    if ! $DRY_RUN; then
+      run "printf '%s\n' '$now' > '$stamp_file'"
+    fi
+  else
+    info "Homebrew updated recently (<30 days); skipping brew update."
+  fi
+}
+
 bootstrap_package_manager() {
   case "$PKG_MGR" in
     brew)
@@ -94,12 +138,16 @@ bootstrap_package_manager() {
           # Ensure brew in PATH for current session (Apple Silicon + Intel)
           if [ -d "/opt/homebrew/bin" ]; then eval "$($DRY_RUN && echo ":" || /opt/homebrew/bin/brew shellenv)" 2>/dev/null || true; fi
           if [ -d "/usr/local/bin" ]; then eval "$($DRY_RUN && echo ":" || /usr/local/bin/brew shellenv)" 2>/dev/null || true; fi
+          # Mark brew as updated now to avoid immediate re-update
+          if ! $DRY_RUN; then
+            ensure_state_dir
+            run "printf '%s\n' '$(date +%s)' > '$STATE_DIR/brew.update.ts'"
+          fi
         else
           warn "Skipped Homebrew installation."
         fi
       else
-        info "Homebrew present. Updating taps..."
-        run "brew update"
+        brew_update_if_needed
       fi
       ;;
     apt)
