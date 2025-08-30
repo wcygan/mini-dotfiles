@@ -91,8 +91,8 @@ Example preamble lines when automating or running commands:
   timestamp). Lives outside the repo and is not tracked by git.
 - Shell setup: Prefers `zsh`; offers to `chsh` to the detected path if not
   default. Adds shell path to `/etc/shells` when needed.
-- Dotfile links: Symlinks minimal `~/.zshrc`, `~/.bashrc`, `~/.gitconfig`, and
-  `~/.aliases.sh` from `dotfiles/`, backing up existing files with timestamped
+- Dotfile links: Symlinks minimal `~/.zshrc`, `~/.bashrc`, `~/.gitconfig`,
+  `~/.aliases.sh`, and `~/.tmux.conf` from `dotfiles/`, backing up existing files with timestamped
   `.bak.*` suffixes.
 - Idempotence: Skips re‑linking when links already point to this repo; backups
   only when replacing real files.

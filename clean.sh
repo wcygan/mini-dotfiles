@@ -88,6 +88,7 @@ TARGETS=(
   "$DOTFILES_DIR/bashrc|$HOME/.bashrc"
   "$DOTFILES_DIR/gitconfig|$HOME/.gitconfig"
   "$DOTFILES_DIR/aliases.sh|$HOME/.aliases.sh"
+  "$DOTFILES_DIR/tmux.conf|$HOME/.tmux.conf"
 )
 
 ##############################################################################

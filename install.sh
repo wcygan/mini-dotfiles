@@ -265,6 +265,7 @@ link_dotfiles() {
   link_file "${DOTFILES_DIR}/bashrc" "$HOME/.bashrc"
   link_file "${DOTFILES_DIR}/gitconfig" "$HOME/.gitconfig"
   link_file "${DOTFILES_DIR}/aliases.sh" "$HOME/.aliases.sh"
+  link_file "${DOTFILES_DIR}/tmux.conf" "$HOME/.tmux.conf"
 }
 
 ##############################################################################
