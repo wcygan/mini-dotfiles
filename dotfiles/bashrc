@@ -20,3 +20,8 @@ fi
 if command -v dircolors >/dev/null 2>&1; then
   eval "$(dircolors -b)"
 fi
+
+# Starship prompt (if installed)
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi

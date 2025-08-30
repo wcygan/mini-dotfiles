@@ -108,6 +108,9 @@ Example preamble lines when automating or running commands:
 - Verbose: Use `--verbose` to print invoked commands.
 - Clean: `./clean.sh` to remove repo-managed symlinks created by `install.sh`
   (safe, idempotent; supports `--dry-run`, `--yes`, `--verbose`).
+- Terminal tools: `./install-terminal.sh` to install cross-platform terminal
+  utilities like starship. Skips if already installed, runs non-interactively,
+  and logs with the same visual style.
 
 ##############################################################################
 # 07. Contribution Guide For Agents                                          #
