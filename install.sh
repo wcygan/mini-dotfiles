@@ -268,6 +268,15 @@ link_dotfiles() {
   link_file "${DOTFILES_DIR}/tmux.conf" "$HOME/.tmux.conf"
 }
 
+install_terminal_tools() {
+  info "🛠️  Installing terminal tools (fonts + starship)"
+  local cmd="bash '${SCRIPT_DIR}/install-terminal.sh'"
+  if $YES; then cmd+=" --yes"; fi
+  if $DRY_RUN; then cmd+=" --dry-run"; fi
+  if $VERBOSE; then cmd+=" --verbose"; fi
+  run "$cmd"
+}
+
 ##############################################################################
 # 06. CLI & Entry Point                                                      #
 ##############################################################################
@@ -302,11 +311,12 @@ parse_args() {
 main() {
   parse_args "$@"
   info "🚀 Starting mini-dotfiles installation"
-  info "🧰 Preamble: detect OS, bootstrap packages, set shell, link dotfiles."
+  info "🧰 Preamble: detect OS, bootstrap packages, set shell, link dotfiles, install terminal tools."
   detect_platform
   bootstrap_package_manager
   ensure_shell
   link_dotfiles
+  install_terminal_tools
   ok "🎉 Done. You may restart your shell to apply changes."
 }
 
