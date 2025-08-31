@@ -12,7 +12,9 @@ jobs:
       - name: Build Ubuntu test image
         run: docker build -f test/docker/Dockerfile.ubuntu -t mini-dotfiles:test-ubuntu .
       - name: Run tests (Ubuntu)
-        run: docker run --rm -v "$PWD":/dotfiles mini-dotfiles:test-ubuntu
+        run: >-
+          docker run --rm -v "$PWD":/dotfiles mini-dotfiles:test-ubuntu
+          bash -lc 'git config --global --add safe.directory /dotfiles && bats test/bats'
 
   fedora:
     runs-on: ubuntu-24.04  # Host runner for the container
