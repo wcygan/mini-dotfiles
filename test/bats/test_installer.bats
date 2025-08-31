@@ -96,6 +96,16 @@ teardown() {
   command -v deno >/dev/null 2>&1
 }
 
+@test "deno is available in a new login shell after install" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Simulate a fresh login shell which reads ~/.bash_profile -> ~/.bashrc
+  # Our ~/.bashrc prepends $HOME/.deno/bin to PATH
+  run bash -lc 'command -v deno >/dev/null 2>&1 && deno --version >/dev/null 2>&1'
+  [ "$status" -eq 0 ]
+}
+
 @test "install.sh is idempotent (2nd run ok)" {
   # First run
   run ./install.sh
