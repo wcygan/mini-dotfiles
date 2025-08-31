@@ -9,4 +9,4 @@ alias gp='git push'
 alias gpr='git pull --rebase'
 alias gm='git merge'
 alias gl='git log'
-
+alias lg='lazygit'
