@@ -100,3 +100,19 @@ teardown() {
   echo "$output" | grep -q "Files"
   echo "$output" | grep -q "Software"
 }
+
+@test "second run logs starship already installed (JSONL)" {
+  # Start with a clean JSONL log for deterministic matching
+  rm -f ./.logs/install.jsonl || true
+
+  # First run installs starship
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Second run should skip starship install
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Assert a JSON log entry shows the skip message under install-software step
+  jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="starship already installed; skipping")' ./.logs/install.jsonl >/dev/null
+}

@@ -15,6 +15,60 @@ try {
   const binDir = join(home, ".local", "bin");
   await Deno.mkdir(binDir, { recursive: true }).catch(() => {});
 
+  // Build a safe, system-first PATH to avoid broken user shims (e.g. a stray
+  // ~/.local/bin/env). Keep existing entries but put system dirs up front.
+  const systemFirst = [
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+  ];
+  const currentPath = Deno.env.get("PATH") ?? "";
+  const seen = new Set<string>();
+  const parts: string[] = [];
+  for (const p of systemFirst) {
+    if (!seen.has(p)) {
+      parts.push(p);
+      seen.add(p);
+    }
+  }
+  for (const p of currentPath.split(":").filter(Boolean)) {
+    if (!seen.has(p)) {
+      parts.push(p);
+      seen.add(p);
+    }
+  }
+  const safePATH = parts.join(":");
+  try {
+    Deno.env.set("PATH", safePATH);
+    await log.debug(STEP, "using system-first PATH during install");
+  } catch {
+    // non-fatal
+  }
+
+  // Warn if suspicious user 'env' files exist that could break installers
+  try {
+    const localEnv = join(home, ".local", "bin", "env");
+    const denoEnv = join(home, ".deno", "env");
+    for (const p of [localEnv, denoEnv]) {
+      try {
+        const st = await Deno.stat(p);
+        if (st.isFile) {
+          await log.warn(
+            STEP,
+            `found '${p}' which may shadow system env; installers may fail`,
+          );
+        }
+      } catch {
+        // ignore missing
+      }
+    }
+  } catch {
+    // ignore
+  }
+
   // Verify presence first (ensure PATH contains our binDir for this check)
   const path = Deno.env.get("PATH") ?? "";
   const verifyEnv = { PATH: `${binDir}:${path}` };

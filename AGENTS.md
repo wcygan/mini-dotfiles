@@ -69,6 +69,21 @@
   repo or dotfiles. Review shell expansions and paths. Aim for idempotent, safe
   re-runs.
 
+## Installer Behavior (Install-Once Preference)
+
+- Prefer install-only-if-needed: before installing any tool, first detect if it
+  is already present and usable on `PATH` and skip re-installation if found.
+- Detection: use `command -v <tool>` and, when applicable, include the intended
+  bin directory (for example, `${HOME}/.local/bin`) at the front of `PATH` for
+  verification only. This avoids false negatives when the directory isn’t yet
+  in the user’s shell `PATH`.
+- Idempotency: all installers should be safe to run multiple times. If a tool
+  is already installed, log a concise info message and continue without error.
+- Robust PATH usage: when invoking external package managers or installers,
+  prefer a PATH that prioritizes system directories (e.g., `/usr/bin:/bin:/usr/sbin:/sbin`) and
+  common package manager locations (e.g., Homebrew) to avoid being affected by
+  accidentally shadowed shims in user directories.
+
 ## Logging Mandate (Pretty + JSONL)
 
 - All installer code MUST use `installer/log.ts` for logging.
