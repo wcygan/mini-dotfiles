@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run --allow-all
 
 import $ from "jsr:@david/dax";
-import { join, dirname } from "jsr:@std/path";
+import { dirname, join } from "jsr:@std/path";
 import { log } from "./log.ts";
 
 const STEP = "install-files";
@@ -31,12 +31,14 @@ try {
   if (!home) throw new Error("HOME not set");
 
   const repo = Deno.cwd();
+  const configDir = Deno.env.get("XDG_CONFIG_HOME") ?? join(home, ".config");
   const mapping: Array<[string, string]> = [
     [join(repo, "dotfiles", "bashrc"), join(home, ".bashrc")],
     [join(repo, "dotfiles", "zshrc"), join(home, ".zshrc")],
     [join(repo, "dotfiles", "gitconfig"), join(home, ".gitconfig")],
     [join(repo, "dotfiles", "tmux.conf"), join(home, ".tmux.conf")],
     [join(repo, "dotfiles", "aliases.sh"), join(home, ".aliases.sh")],
+    [join(repo, "dotfiles", "starship.toml"), join(configDir, "starship.toml")],
   ];
 
   await log.info(STEP, "copying dotfiles…");
@@ -51,7 +53,13 @@ try {
   await log.success(STEP, "done");
   await log.stepEnd(STEP, { ok: true });
 } catch (err) {
-  await log.error(STEP, `failed: ${err instanceof Error ? err.message : String(err)}`);
-  await log.stepEnd(STEP, { ok: false, error: err instanceof Error ? (err.stack ?? err.message) : String(err) });
+  await log.error(
+    STEP,
+    `failed: ${err instanceof Error ? err.message : String(err)}`,
+  );
+  await log.stepEnd(STEP, {
+    ok: false,
+    error: err instanceof Error ? (err.stack ?? err.message) : String(err),
+  });
   throw err;
 }

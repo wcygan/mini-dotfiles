@@ -44,13 +44,16 @@
 ### Test Suite Details (`/test`)
 
 - Location: `test/bats/test_installer.bats`.
-- Isolation: tests run with a temporary `HOME` via `mktemp -d` to avoid touching the real user profile.
+- Isolation: tests run with a temporary `HOME` via `mktemp -d` to avoid touching
+  the real user profile.
 - Current assertions:
   - Pretty output markers appear (and order: "Files" before "Software").
   - Deno becomes available in PATH after install.
   - Idempotent second run.
-  - Symlink checks: each expected dotfile is a symlink (`-L`) and contents match the repo source via `cmp -s`.
-- Prefer stable checks on JSON logs when practical: see Logging Mandate for `jq` examples against `./.logs/install.jsonl`.
+  - Symlink checks: each expected dotfile is a symlink (`-L`) and contents match
+    the repo source via `cmp -s`.
+- Prefer stable checks on JSON logs when practical: see Logging Mandate for `jq`
+  examples against `./.logs/install.jsonl`.
 
 ## Commit & Pull Request Guidelines
 
@@ -70,21 +73,29 @@
 
 - All installer code MUST use `installer/log.ts` for logging.
 - Step lifecycle:
-  - Call `await log.stepBegin("<step-id>")` at the start of each installer module/major phase.
+  - Call `await log.stepBegin("<step-id>")` at the start of each installer
+    module/major phase.
   - Emit progress with `log.info|warn|error|success(step, msg)` as needed.
-  - Always finish with `await log.stepEnd("<step-id>", { ok: true })` on success, or `{ ok: false, error }` on failure inside a `catch`.
-- Step ids: Use kebab-case, matching the file or phase name (e.g., `install-files`, `install-software`).
+  - Always finish with `await log.stepEnd("<step-id>", { ok: true })` on
+    success, or `{ ok: false, error }` on failure inside a `catch`.
+- Step ids: Use kebab-case, matching the file or phase name (e.g.,
+  `install-files`, `install-software`).
 - Dual outputs (Option 1):
-  - Pretty stdout: color + emoji when attached to a TTY and `NO_COLOR` is not set.
+  - Pretty stdout: color + emoji when attached to a TTY and `NO_COLOR` is not
+    set.
   - JSON Lines: append one object per line to `./.logs/install.jsonl`.
-- JSON fields (stable for tests): `ts`, `lvl`, `ev` (`step_begin`|`log`|`step_end`), `step`, `msg`, `ok`, `code`, `duration_ms`, `component`, `version`, `error`.
+- JSON fields (stable for tests): `ts`, `lvl`, `ev`
+  (`step_begin`|`log`|`step_end`), `step`, `msg`, `ok`, `code`, `duration_ms`,
+  `component`, `version`, `error`.
 - Environment variables:
   - `LOG_FORMAT=pretty|json|both` (default: `both`)
   - `LOG_FILE` path for JSONL (default: `./.logs/install.jsonl`)
   - `NO_COLOR=1` to disable colors; `LOG_EMOJI=0` to disable emojis
 - Bats test guidance:
-  - Prefer assertions on JSONL. Example: `jq -e 'select(.ev=="step_end" and .step=="install-files" and .ok==true)' ./.logs/install.jsonl >/dev/null`
-  - Ordering check example: `awk '/"step":"install-files"/ && /"ev":"step_begin"/{b=NR} /"step":"install-files"/ && /"ev":"step_end"/{e=NR} END{exit !(b && e && b<e)}' ./.logs/install.jsonl`
+  - Prefer assertions on JSONL. Example:
+    `jq -e 'select(.ev=="step_end" and .step=="install-files" and .ok==true)' ./.logs/install.jsonl >/dev/null`
+  - Ordering check example:
+    `awk '/"step":"install-files"/ && /"ev":"step_begin"/{b=NR} /"step":"install-files"/ && /"ev":"step_end"/{e=NR} END{exit !(b && e && b<e)}' ./.logs/install.jsonl`
 - Example pattern:
   ```ts
   import { log } from "./scripts/log.ts";
@@ -95,8 +106,14 @@
     // ... work ...
     await log.stepEnd(STEP, { ok: true });
   } catch (err) {
-    await log.error(STEP, `failed: ${err instanceof Error ? err.message : String(err)}`);
-    await log.stepEnd(STEP, { ok: false, error: err instanceof Error ? (err.stack ?? err.message) : String(err) });
+    await log.error(
+      STEP,
+      `failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    await log.stepEnd(STEP, {
+      ok: false,
+      error: err instanceof Error ? (err.stack ?? err.message) : String(err),
+    });
     throw err;
   }
   ```
@@ -113,7 +130,11 @@
 - Behavior:
   - Create parent directories as needed.
   - If target exists and is the correct symlink, do nothing (idempotent).
-  - If target is a wrong symlink or a regular file, remove it and recreate pointing to the repo file.
-  - Uses Deno `lstat`, `readLink`, and `symlink({ type: "file" })` for file links.
-- Platforms: macOS/Linux are primary targets; Windows symlinks may require admin/dev-mode.
-- Extending: add new pairs to the mapping in `installer/install-files.ts` and update Bats tests accordingly.
+  - If target is a wrong symlink or a regular file, remove it and recreate
+    pointing to the repo file.
+  - Uses Deno `lstat`, `readLink`, and `symlink({ type: "file" })` for file
+    links.
+- Platforms: macOS/Linux are primary targets; Windows symlinks may require
+  admin/dev-mode.
+- Extending: add new pairs to the mapping in `installer/install-files.ts` and
+  update Bats tests accordingly.

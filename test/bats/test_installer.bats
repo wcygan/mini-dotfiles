@@ -57,6 +57,20 @@ teardown() {
   cmp -s "$HOME/.gitconfig"  "$REPO_ROOT/dotfiles/gitconfig"
   cmp -s "$HOME/.tmux.conf"  "$REPO_ROOT/dotfiles/tmux.conf"
   cmp -s "$HOME/.aliases.sh" "$REPO_ROOT/dotfiles/aliases.sh"
+
+  # Starship config symlink into XDG config dir
+  [ -L "$XDG_CONFIG_HOME/starship.toml" ]
+  cmp -s "$XDG_CONFIG_HOME/starship.toml" "$REPO_ROOT/dotfiles/starship.toml"
+}
+
+@test "starship is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Add local bin to PATH for the current shell session
+  export PATH="$HOME/.local/bin:$PATH"
+  command -v starship >/dev/null 2>&1
+  starship --version >/dev/null 2>&1
 }
 
 @test "deno is available in the same process after install" {
