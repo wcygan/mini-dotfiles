@@ -36,8 +36,7 @@ export async function installTarballBinary(opts: {
 }
 
 export function ghLatestRedirect(repo: string): Promise<string> {
-  // Returns the effective URL of .../releases/latest, e.g. .../tag/v0.54.2
-  return $`sh -lc 'curl -sI -o /dev/null -w %\{url_effective\} https://github.com/${repo}/releases/latest'`
+  // Returns the effective URL of .../releases/latest after redirects, e.g. .../tag/v0.54.2
+  return $`sh -lc 'curl -Ls -o /dev/null -w %\{url_effective\} https://github.com/${repo}/releases/latest'`
     .quiet().then(r => r.stdout.trim());
 }
-

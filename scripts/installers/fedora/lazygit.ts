@@ -37,10 +37,23 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
     const eff = await ghLatestRedirect("jesseduffield/lazygit");
     const tag = eff.split("/").pop() ?? ""; // e.g., v0.54.2
     const version = tag.replace(/^v/, "");
-    const url = version
-      ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_Linux_${arch}.tar.gz`
-      : `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_Linux_${arch}.tar.gz`;
-    await installTarballBinary({ url, binName: "lazygit" });
+    const verUrl = version
+      ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_linux_${arch}.tar.gz`
+      : "";
+    const latestUrl = `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_linux_${arch}.tar.gz`;
+    try {
+      await log.info("install-software", `lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`);
+      if (verUrl) await log.info("install-software", `trying url: ${verUrl}`);
+      if (verUrl) {
+        await installTarballBinary({ url: verUrl, binName: "lazygit" });
+        return;
+      }
+      throw new Error("no versioned url");
+    } catch {
+      // Fallback if the versioned asset is missing for this arch
+      await log.info("install-software", `fallback url: ${latestUrl}`);
+      await installTarballBinary({ url: latestUrl, binName: "lazygit" });
+    }
   }
 
   override async post() {
