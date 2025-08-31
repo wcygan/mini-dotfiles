@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
-  bash zsh git curl ca-certificates \
+  bash zsh git curl ca-certificates unzip \
   bats jq \
   && rm -rf /var/lib/apt/lists/*
 

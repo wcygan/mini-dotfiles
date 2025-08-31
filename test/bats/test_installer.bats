@@ -8,6 +8,12 @@ setup() {
   export REPO_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/../.." && pwd)"
   export HOME="$(mktemp -d)"            # isolate HOME
   export XDG_CONFIG_HOME="$HOME/.config"
+  
+  # Configure git for CI environments
+  git config --global user.email "test@example.com" 2>/dev/null || true
+  git config --global user.name "Test User" 2>/dev/null || true
+  git config --global init.defaultBranch main 2>/dev/null || true
+  
   cd "$REPO_ROOT"
 }
 
@@ -20,6 +26,11 @@ teardown() {
 
 @test "install.sh runs and prints Files then Software" {
   run ./install.sh
+  
+  # Debug output for CI
+  echo "Exit status: $status" >&2
+  echo "Output: $output" >&2
+  
   [ "$status" -eq 0 ]
 
   # Check that both markers appear in output

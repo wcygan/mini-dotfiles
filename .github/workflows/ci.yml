@@ -19,7 +19,7 @@ jobs:
     container:
       image: fedora:40
     steps:
-      - run: dnf -y install git curl bash zsh bats jq
+      - run: dnf -y install git curl bash zsh bats jq unzip
       - uses: actions/checkout@v4
       - name: Run tests (Fedora container)
         run: bats test/bats

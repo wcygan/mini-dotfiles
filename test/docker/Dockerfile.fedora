@@ -1,7 +1,7 @@
 FROM fedora:40
 
 RUN dnf -y install \
-  bash zsh git curl \
+  bash zsh git curl unzip \
   bats jq \
   && dnf clean all
 
