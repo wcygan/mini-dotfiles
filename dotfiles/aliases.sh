@@ -1,7 +1,10 @@
 # mini-dotfiles: shared aliases (bash & zsh)
 
-# Minimal, common aliases
+# General
 alias c='clear'
+alias dt='deno task'
+
+# Git
 alias gs='git status'
 alias gc='git commit'
 alias gaa='git add .'
