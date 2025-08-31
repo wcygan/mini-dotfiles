@@ -2,7 +2,7 @@ FROM fedora:40
 
 RUN dnf -y install \
   bash zsh git curl unzip \
-  bats jq \
+  bats jq diffutils \
   && dnf clean all
 
 WORKDIR /dotfiles

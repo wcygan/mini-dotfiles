@@ -21,7 +21,7 @@ jobs:
     container:
       image: fedora:40
     steps:
-      - run: dnf -y install git curl bash zsh bats jq unzip
+      - run: dnf -y install git curl bash zsh bats jq unzip diffutils
       - uses: actions/checkout@v4
       - name: Mark workspace as safe for Git
         run: git config --system --add safe.directory "$GITHUB_WORKSPACE"

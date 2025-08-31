@@ -15,14 +15,29 @@ try {
   const binDir = join(home, ".local", "bin");
   await Deno.mkdir(binDir, { recursive: true }).catch(() => {});
 
-  await log.info(STEP, `installing starship to ${binDir}…`);
-  await $`curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b ${binDir}`;
-
-  // Verify install (ensure PATH contains our binDir for this check)
+  // Verify presence first (ensure PATH contains our binDir for this check)
   const path = Deno.env.get("PATH") ?? "";
   const verifyEnv = { PATH: `${binDir}:${path}` };
-  await $`sh -lc 'command -v starship >/dev/null 2>&1'`.env(verifyEnv);
-  await log.success(STEP, "starship installed");
+
+  let starshipPresent = false;
+  try {
+    await $`sh -lc 'command -v starship >/dev/null 2>&1'`.env(verifyEnv)
+      .quiet();
+    starshipPresent = true;
+  } catch {
+    starshipPresent = false;
+  }
+
+  if (starshipPresent) {
+    await log.info(STEP, "starship already installed; skipping");
+  } else {
+    await log.info(STEP, `installing starship to ${binDir}…`);
+    await $`curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b ${binDir}`;
+
+    // Verify install
+    await $`sh -lc 'command -v starship >/dev/null 2>&1'`.env(verifyEnv);
+    await log.success(STEP, "starship installed");
+  }
 
   // Legacy marker for existing tests
   await $`echo Software`;
@@ -74,7 +89,12 @@ try {
           // best-effort; our dotfiles source the scripts directly
         }
       } catch (e) {
-        await log.warn(STEP, `brew install fzf failed (${e instanceof Error ? e.message : String(e)}), will try other methods`);
+        await log.warn(
+          STEP,
+          `brew install fzf failed (${
+            e instanceof Error ? e.message : String(e)
+          }), will try other methods`,
+        );
       }
     }
 
@@ -90,7 +110,12 @@ try {
         await run("apt-get install -y fzf");
         installed = true;
       } catch (e) {
-        await log.warn(STEP, `apt-get install fzf failed (${e instanceof Error ? e.message : String(e)}), will try other methods`);
+        await log.warn(
+          STEP,
+          `apt-get install fzf failed (${
+            e instanceof Error ? e.message : String(e)
+          }), will try other methods`,
+        );
       }
     }
 
@@ -105,7 +130,12 @@ try {
         await run("dnf install -y fzf");
         installed = true;
       } catch (e) {
-        await log.warn(STEP, `dnf install fzf failed (${e instanceof Error ? e.message : String(e)}), will try git installer`);
+        await log.warn(
+          STEP,
+          `dnf install fzf failed (${
+            e instanceof Error ? e.message : String(e)
+          }), will try git installer`,
+        );
       }
     }
 
@@ -116,14 +146,23 @@ try {
       try {
         try {
           const st = await Deno.stat(fzfDir);
-          if (!st.isDirectory) throw new Error("~/.fzf exists and is not a directory");
+          if (!st.isDirectory) {
+            throw new Error("~/.fzf exists and is not a directory");
+          }
         } catch {
           await $`git clone --depth 1 https://github.com/junegunn/fzf.git ${fzfDir}`;
         }
-        await $`${join(fzfDir, "install")} --key-bindings --completion --no-update-rc`;
+        await $`${
+          join(fzfDir, "install")
+        } --key-bindings --completion --no-update-rc`;
         installed = true;
       } catch (e) {
-        await log.warn(STEP, `git-based fzf install failed: ${e instanceof Error ? e.message : String(e)}`);
+        await log.warn(
+          STEP,
+          `git-based fzf install failed: ${
+            e instanceof Error ? e.message : String(e)
+          }`,
+        );
       }
     }
 
