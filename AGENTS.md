@@ -87,7 +87,7 @@
   - Ordering check example: `awk '/"step":"install-files"/ && /"ev":"step_begin"/{b=NR} /"step":"install-files"/ && /"ev":"step_end"/{e=NR} END{exit !(b && e && b<e)}' ./.logs/install.jsonl`
 - Example pattern:
   ```ts
-  import { log } from "./installer/log.ts";
+  import { log } from "./scripts/log.ts";
   const STEP = "install-foo";
   await log.stepBegin(STEP);
   try {

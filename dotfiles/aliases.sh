@@ -6,6 +6,7 @@ alias dt='deno task'
 
 # Git
 alias gs='git status'
+alias gd='git diff'
 alias gc='git commit'
 alias gaa='git add .'
 alias gp='git push'

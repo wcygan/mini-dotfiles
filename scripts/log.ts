@@ -151,7 +151,7 @@ async function emit(fields: Omit<BaseFields, "ts" | "version">) {
   const payload: BaseFields = {
     ts: nowIso(),
     version: VERSION,
-    component: "installer",
+    component: "scripts",
     ...fields,
   };
 

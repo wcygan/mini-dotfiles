@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# mini-dotfiles installer
+# mini-dotfiles scripts
 # - Ensures we are in github.com/wcygan/mini-dotfiles (clones otherwise)
 # - Installs Deno if missing
 # - Delegates to `deno task install` for full installation
