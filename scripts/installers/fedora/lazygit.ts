@@ -19,7 +19,15 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       await this.dnfInstall("lazygit");
       return;
     } catch {
-      // fall through
+      // not in default repos, try COPR
+      try {
+        await this.dnfInstall("dnf-plugins-core");
+        await $`dnf -y copr enable atim/lazygit`;
+        await this.dnfInstall("lazygit");
+        return;
+      } catch {
+        // fall through to upstream tarball
+      }
     }
 
     const os = Deno.build.os; // linux here
