@@ -73,6 +73,16 @@ teardown() {
   starship --version >/dev/null 2>&1
 }
 
+@test "lazygit is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Include local bin for fallback installs
+  export PATH="$HOME/.local/bin:$PATH"
+  command -v lazygit >/dev/null 2>&1
+  lazygit --version >/dev/null 2>&1
+}
+
 @test "deno is available in the same process after install" {
   # First run the installer
   ./install.sh >/dev/null 2>&1
@@ -115,4 +125,20 @@ teardown() {
 
   # Assert a JSON log entry shows the skip message under install-software step
   jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="starship already installed; skipping")' ./.logs/install.jsonl >/dev/null
+}
+
+@test "second run logs lazygit already installed (JSONL)" {
+  # Fresh log file to avoid prior entries
+  rm -f ./.logs/install.jsonl || true
+
+  # First run installs lazygit
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Second run should skip lazygit install
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Assert a JSON log entry shows the skip message
+  jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="lazygit already installed; skipping")' ./.logs/install.jsonl >/dev/null
 }
