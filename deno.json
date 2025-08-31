@@ -2,6 +2,7 @@
   "tasks": {
     "install": "./scripts/main.ts",
     "curl-install": "curl -fsSL https://raw.githubusercontent.com/wcygan/mini-dotfiles/refs/heads/main/install.sh | sh",
-    "test": "bats test/bats/test_installer.bats"
+    "test": "bats test/bats/test_installer.bats",
+    "latest": "git pull --rebase && deno task install"
   }
 }
