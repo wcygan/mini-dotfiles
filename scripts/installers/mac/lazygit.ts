@@ -1,6 +1,5 @@
 import { MacInstaller } from "./base.ts";
 import { cmdExists } from "../core/utils.ts";
-import { log } from "../../log.ts";
 import $ from "jsr:@david/dax";
 
 export class LazyGitMacInstaller extends MacInstaller {
@@ -8,7 +7,7 @@ export class LazyGitMacInstaller extends MacInstaller {
 
   override async run() {
     if (await cmdExists("lazygit")) {
-      await log.info("install-software", "lazygit already installed; skipping");
+      await this.info("lazygit already installed; skipping");
       return;
     }
     const listed = await $`brew list --versions lazygit`.quiet().then(() => true, () => false);

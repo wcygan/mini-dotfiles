@@ -149,8 +149,8 @@ teardown() {
   run ./install.sh
   [ "$status" -eq 0 ]
 
-  # Assert a JSON log entry shows the skip message under install-software step
-  jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="starship already installed; skipping")' ./.logs/install.jsonl >/dev/null
+  # Assert a JSON log entry shows the skip message (step is per-installer)
+  jq -e 'select(.ev=="log" and .msg=="starship already installed; skipping")' ./.logs/install.jsonl >/dev/null
 }
 
 @test "second run logs lazygit already installed (JSONL)" {
@@ -165,8 +165,8 @@ teardown() {
   run ./install.sh
   [ "$status" -eq 0 ]
 
-  # Assert a JSON log entry shows the skip message
-  jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="lazygit already installed; skipping")' ./.logs/install.jsonl >/dev/null
+  # Assert a JSON log entry shows the skip message (step is per-installer)
+  jq -e 'select(.ev=="log" and .msg=="lazygit already installed; skipping")' ./.logs/install.jsonl >/dev/null
 }
 
 @test "post-install logs reload hint (JSONL)" {

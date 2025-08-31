@@ -1,6 +1,5 @@
 import { MacInstaller } from "./base.ts";
 import { cmdExists } from "../core/utils.ts";
-import { log } from "../../log.ts";
 import $ from "jsr:@david/dax";
 
 export class StarshipMacInstaller extends MacInstaller {
@@ -8,7 +7,7 @@ export class StarshipMacInstaller extends MacInstaller {
 
   override async run() {
     if (await cmdExists("starship")) {
-      await log.info("install-software", "starship already installed; skipping");
+      await this.info("starship already installed; skipping");
       return;
     }
     const listed = await $`brew list --versions starship`.quiet().then(() => true, () => false);

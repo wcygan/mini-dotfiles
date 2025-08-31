@@ -1,7 +1,6 @@
 import $ from "jsr:@david/dax";
 import { FedoraInstaller } from "./base.ts";
 import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
-import { log } from "../../log.ts";
 
 export class StarshipFedoraInstaller extends FedoraInstaller {
   readonly name = "starship-fedora";
@@ -10,7 +9,7 @@ export class StarshipFedoraInstaller extends FedoraInstaller {
 
   async run() {
     if (await cmdExists("starship")) {
-      await log.info("install-software", "starship already installed; skipping");
+      await this.info("starship already installed; skipping");
       return;
     }
     // Prefer official script to keep consistent behavior and latest version

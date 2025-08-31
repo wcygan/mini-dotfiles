@@ -1,7 +1,6 @@
 import $ from "jsr:@david/dax";
 import { UbuntuInstaller } from "./base.ts";
 import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
-import { log } from "../../log.ts";
 
 export class StarshipUbuntuInstaller extends UbuntuInstaller {
   readonly name = "starship-ubuntu";
@@ -10,7 +9,7 @@ export class StarshipUbuntuInstaller extends UbuntuInstaller {
 
   async run() {
     if (await cmdExists("starship")) {
-      await log.info("install-software", "starship already installed; skipping");
+      await this.info("starship already installed; skipping");
       return;
     }
     const dst = binDir();

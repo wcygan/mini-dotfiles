@@ -72,7 +72,11 @@ Each concrete installer extends one of these bases and implements `name`, `run`,
 
 ## Logging & Idempotency Rules
 
-* Use `log.stepBegin/stepEnd/info/warn/error/success`.
+* Centralized logging with per-installer scope:
+  - Orchestrator (`runInstaller`) opens the step `install-<installer.name>`.
+  - OS base classes expose scoped helpers: `this.info/warn/error/success/debug`.
+  - Children MUST use these helpers and MUST NOT import `log` or hard‑code step names (e.g., never use `"install-software"`).
+  - Outside installers, use `log.stepBegin/stepEnd/...` or `scoped(step)` from `scripts/log.ts`.
 * Every installer **must** be idempotent:
 
   * Prefer `command -v <tool>` checks before installing.
@@ -145,6 +149,10 @@ export class MyToolUbuntuInstaller extends UbuntuInstaller {
   }
 
   async run() {
+    if (await cmdExists("mytool")) {
+      await this.info("mytool already installed; skipping");
+      return;
+    }
     // preferred path: distro package
     try {
       await this.aptInstall("mytool");
@@ -225,6 +233,14 @@ export function installersFor(os: OS) {
   * If it provides shell widgets/completions, assert presence (e.g., `type -t <widget>` / `complete -p <cmd>` in `bash -ilc`).
   * Re-run `./install.sh` and confirm idempotency + logs.
 
+### JSONL step scoping (optional checks)
+
+You may assert the scoped step for skip messages, e.g.:
+
+```
+jq -e 'select(.ev=="log" and .step=="install-lazygit-ubuntu" and .msg=="lazygit already installed; skipping")' ./.logs/install.jsonl >/dev/null
+```
+
 ---
 
 ## Feature Flags (optional)
@@ -277,7 +293,7 @@ To keep this repository approachable and maintainable, all agents and installers
 6. **Consistency First**
 
   * Prefer consistent naming (`install-<tool>-<os>`) across all installers.
-  * Logging always uses the parent step `"install-software"` with child steps keyed by installer name.
+  * Logging is scoped per installer: children call `this.info/warn/error/success/debug` and NEVER repeat a step name. The step is always `install-<tool>-<os>`. Orchestrators may emit top-level logs (e.g., `install-software`) but children must not.
 
 ---
 

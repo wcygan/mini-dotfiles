@@ -1,6 +1,5 @@
 import { FedoraInstaller } from "./base.ts";
 import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
-import { log } from "../../log.ts";
 import $ from "jsr:@david/dax";
 import { installTarballBinary, ghLatestRedirect } from "../core/toolkit.ts";
 
@@ -11,7 +10,7 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
 
   async run() {
     if (await cmdExists("lazygit")) {
-      await log.info("install-software", "lazygit already installed; skipping");
+      await this.info("lazygit already installed; skipping");
       return;
     }
 
@@ -42,8 +41,8 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       : "";
     const latestUrl = `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_linux_${arch}.tar.gz`;
     try {
-      await log.info("install-software", `lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`);
-      if (verUrl) await log.info("install-software", `trying url: ${verUrl}`);
+      await this.info(`lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`);
+      if (verUrl) await this.info(`trying url: ${verUrl}`);
       if (verUrl) {
         await installTarballBinary({ url: verUrl, binName: "lazygit" });
         return;
@@ -51,7 +50,7 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       throw new Error("no versioned url");
     } catch {
       // Fallback if the versioned asset is missing for this arch
-      await log.info("install-software", `fallback url: ${latestUrl}`);
+      await this.info(`fallback url: ${latestUrl}`);
       await installTarballBinary({ url: latestUrl, binName: "lazygit" });
     }
   }
