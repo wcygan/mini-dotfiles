@@ -14,20 +14,22 @@ jobs:
       - name: Run tests (Ubuntu)
         run: >-
           docker run --rm -v "$PWD":/dotfiles mini-dotfiles:test-ubuntu
-          bash -lc 'git config --global --add safe.directory /dotfiles && bats test/bats'
+          bash -lc 'git config --system --add safe.directory /dotfiles && bats test/bats'
 
   fedora:
-    runs-on: ubuntu-24.04  # Host runner for the container
+    runs-on: ubuntu-24.04 # Host runner for the container
     container:
       image: fedora:40
     steps:
       - run: dnf -y install git curl bash zsh bats jq unzip
       - uses: actions/checkout@v4
+      - name: Mark workspace as safe for Git
+        run: git config --system --add safe.directory "$GITHUB_WORKSPACE"
       - name: Run tests (Fedora container)
         run: bats test/bats
 
   macos:
-    runs-on: macos-14  # ARM64 (Apple Silicon)
+    runs-on: macos-14 # ARM64 (Apple Silicon)
     steps:
       - uses: actions/checkout@v4
       - name: Install bats

@@ -36,6 +36,10 @@ normalize_git_url() {
 
 ensure_in_repo() {
   # If not inside the target repo, clone it and re-run this script.
+  # Fast path: if a Git repo is present here, trust it and continue.
+  if [ -d .git ]; then
+    return 0
+  fi
   if command -v git >/dev/null 2>&1; then
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
