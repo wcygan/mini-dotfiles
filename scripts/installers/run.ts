@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run --allow-all
 import { detectOS, runInstaller } from "./core/types.ts";
-import { installersFor } from "../installers/registry.ts";
+import { installersFor } from "./registry.ts";
 import { log } from "../log.ts";
 import { binDir, ensureDir, safePATH } from "./core/utils.ts";
 
@@ -28,4 +28,3 @@ try {
   await log.stepEnd(STEP, { ok: false, error: msg });
   throw err;
 }
-

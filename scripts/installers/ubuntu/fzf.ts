@@ -16,7 +16,8 @@ export class FzfUbuntuInstaller extends UbuntuInstaller {
       await $`${join(fzfDir, "install")} --key-bindings --completion --no-update-rc`;
     } catch {
       await this.aptUpdate();
-      await this.aptInstall("fzf");
+      // Include gzip to allow sourcing gzipped example scripts in minimal images
+      await this.aptInstall("fzf", "gzip");
     }
   }
 
@@ -24,4 +25,3 @@ export class FzfUbuntuInstaller extends UbuntuInstaller {
     if (!(await cmdExists("fzf"))) throw new Error("fzf not found on PATH after install");
   }
 }
-

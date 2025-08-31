@@ -3,7 +3,10 @@ import { join } from "jsr:@std/path";
 
 export async function cmdExists(cmd: string): Promise<boolean> {
   try {
-    await $`sh -lc 'command -v ${cmd} >/dev/null 2>&1'`.quiet();
+    const extraPaths = [binDir(), join(homeDir(), ".fzf", "bin")];
+    const current = Deno.env.get("PATH") ?? "";
+    const path = [...extraPaths, ...current.split(":").filter(Boolean)].join(":");
+    await $`sh -lc 'command -v ${cmd} >/dev/null 2>&1'`.env({ PATH: path }).quiet();
     return true;
   } catch {
     return false;
@@ -55,4 +58,3 @@ export function safePATH(): string {
   for (const p of [...systemFirst, ...current]) if (!seen.has(p)) { parts.push(p); seen.add(p); }
   return parts.join(":");
 }
-
