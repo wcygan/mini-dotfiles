@@ -1,0 +1,27 @@
+import $ from "jsr:@david/dax";
+import { UbuntuInstaller } from "./base.ts";
+import { binDir, cmdExists, ensureDir, safePATH } from "../core/utils.ts";
+import { log } from "../../log.ts";
+
+export class StarshipUbuntuInstaller extends UbuntuInstaller {
+  readonly name = "starship-ubuntu";
+
+  async pre() {
+    await ensureDir(binDir());
+    try { Deno.env.set("PATH", safePATH()); } catch { /* ignore */ }
+  }
+
+  async run() {
+    if (await cmdExists("starship")) {
+      await log.info("install-software", "starship already installed; skipping");
+      return;
+    }
+    const dst = binDir();
+    await $`curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b ${dst}`;
+  }
+
+  async post() {
+    if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
+  }
+}
+

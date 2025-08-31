@@ -4,7 +4,7 @@ import { log } from "./log.ts";
 
 // Run installers in sequence
 await import("./install-files.ts");
-await import("./install-software.ts");
+await import("./installers/run.ts");
 
 // Post-install guidance: emit a JSONL + pretty log with the reload hint
 try {
