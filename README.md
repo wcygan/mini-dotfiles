@@ -23,4 +23,4 @@ Dotfiles setup
 1. Install with `curl`, which...
 2. Clones the repo (if not present)
 3. Installs [Deno](https://deno.com/)
-4. Installs Aliases, Tools, and Configurations
+4. Installs Aliases, Tools, and Configurations (with Symlinks)
