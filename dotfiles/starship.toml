@@ -2,7 +2,7 @@ palette = "catppuccin_frappe"
 
 # Reorder modules so Kubernetes appears at the end of the left prompt
 # Keep a simple set covering common modules used here.
-format = "$username $directory $git_branch $git_status $deno $kubernetes$line_break$character"
+format = "$username@$hostname in $directory $git_branch $git_status $deno $kubernetes$line_break$character"
 
 [palettes.catppuccin_frappe]
 rosewater = "#f2d5cf"
@@ -49,3 +49,14 @@ format = '[$symbol$context( \($namespace\))]($style) '
 # Always show the current username in the prompt
 show_always = true
 format = '[$user]($style) '
+
+[hostname]
+# Always show hostname (not only on SSH)
+ssh_only = false
+format = '[$hostname]($style)'
+
+[directory]
+# Show only the last path segment (folder name)
+truncation_length = 1
+truncate_to_repo = false
+format = '[$path]($style) '
