@@ -26,3 +26,7 @@ alias gm='git merge'
 alias gl='git log'
 alias gca='git commit --amend --no-edit'
 alias lg='lazygit'
+
+# Editors
+alias vi='nvim'
+alias vim='nvim'

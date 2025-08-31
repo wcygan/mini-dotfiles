@@ -137,6 +137,55 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
+@test "jq is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+  command -v jq >/dev/null 2>&1
+}
+
+@test "bat is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+  command -v bat >/dev/null 2>&1
+}
+
+@test "fd is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+  command -v fd >/dev/null 2>&1
+}
+
+@test "nvim is installed and available on PATH" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+  command -v nvim >/dev/null 2>&1
+}
+
+@test "nvim is the default editor in bash (aliases + env)" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Login + interactive bash to load aliases and env
+  run bash -ilc '
+    alias vi | grep -q "nvim" && \
+    alias vim | grep -q "nvim" && \
+    [ "$EDITOR" = "nvim" ] && [ "$VISUAL" = "nvim" ]
+  '
+  [ "$status" -eq 0 ]
+}
+
+@test "nvim is the default editor in zsh (aliases + env)" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  run zsh -ilc '
+    alias vi | grep -q nvim && \
+    alias vim | grep -q nvim && \
+    [ "$EDITOR" = "nvim" ] && [ "$VISUAL" = "nvim" ]
+  '
+  [ "$status" -eq 0 ]
+}
+
 @test "second run logs starship already installed (JSONL)" {
   # Start with a clean JSONL log for deterministic matching
   rm -f ./.logs/install.jsonl || true

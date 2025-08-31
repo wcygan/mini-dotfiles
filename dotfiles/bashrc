@@ -84,3 +84,12 @@ if ! command -v starship >/dev/null 2>&1; then
 fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Editor defaults
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# Nicer man pages via bat when available
+if command -v bat >/dev/null 2>&1; then
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+fi
