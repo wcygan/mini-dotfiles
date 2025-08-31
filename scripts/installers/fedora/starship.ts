@@ -6,7 +6,7 @@ import { log } from "../../log.ts";
 export class StarshipFedoraInstaller extends FedoraInstaller {
   readonly name = "starship-fedora";
 
-  async pre() {
+  override async pre() {
     await ensureDir(binDir());
     try { Deno.env.set("PATH", safePATH()); } catch { /* ignore */ }
   }
@@ -21,8 +21,7 @@ export class StarshipFedoraInstaller extends FedoraInstaller {
     await $`curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b ${dst}`;
   }
 
-  async post() {
+  override async post() {
     if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
   }
 }
-

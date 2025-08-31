@@ -45,10 +45,10 @@ function envStr(name: string, def: string): string {
 
 function isTTY(): boolean {
   try {
-    // Deno.isatty may throw if rid invalid in some environments
-    // deno-lint-ignore no-explicit-any
-    const anyDeno: any = Deno as any;
-    return !!anyDeno?.isatty?.(Deno.stdout.rid);
+    // Deno 2: prefer isTerminal() on stdout
+    return typeof (Deno.stdout as any).isTerminal === "function"
+      ? (Deno.stdout as any).isTerminal()
+      : false;
   } catch {
     return false;
   }

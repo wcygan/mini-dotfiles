@@ -6,16 +6,18 @@ import $ from "jsr:@david/dax";
 export class StarshipMacInstaller extends MacInstaller {
   readonly name = "starship-mac";
 
-  async run() {
+  override async run() {
     if (await cmdExists("starship")) {
       await log.info("install-software", "starship already installed; skipping");
       return;
     }
-    await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew list --versions starship >/dev/null 2>&1 || env HOMEBREW_NO_AUTO_UPDATE=1 brew install starship`;
+    const listed = await $`brew list --versions starship`.quiet().then(() => true, () => false);
+    if (!listed) {
+      await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew install starship`;
+    }
   }
 
-  async post() {
+  override async post() {
     if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
   }
 }
-

@@ -7,7 +7,7 @@ import { join } from "jsr:@std/path";
 export class LazyGitFedoraInstaller extends FedoraInstaller {
   readonly name = "lazygit-fedora";
 
-  async pre() { await ensureDir(binDir()); }
+  override async pre() { await ensureDir(binDir()); }
 
   async run() {
     if (await cmdExists("lazygit")) {
@@ -27,17 +27,9 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
     const assetOS = os === "linux" ? "Linux" : "";
     const assetArch = arch === "x86_64" ? "x86_64" : arch === "aarch64" ? "arm64" : "";
     if (!assetOS || !assetArch) throw new Error(`unsupported platform ${os}/${arch}`);
-
-    const latestRes = await fetch("https://api.github.com/repos/jesseduffield/lazygit/releases/latest", {
-      headers: { "Accept": "application/vnd.github+json" },
-    });
-    if (!latestRes.ok) throw new Error(`failed to fetch latest release: ${latestRes.status}`);
-    const latest = await latestRes.json();
-    const tag = String(latest.tag_name ?? latest.tag ?? "");
-    if (!tag) throw new Error("could not determine latest tag");
-    const version = tag.replace(/^v/, "");
-    const assetName = `lazygit_${version}_${assetOS}_${assetArch}.tar.gz`;
-    const url = `https://github.com/jesseduffield/lazygit/releases/download/${tag}/${assetName}`;
+    // Avoid GitHub API rate limits by using the versionless latest/download URL
+    const assetName = `lazygit_${assetOS}_${assetArch}.tar.gz`;
+    const url = `https://github.com/jesseduffield/lazygit/releases/latest/download/${assetName}`;
 
     const tmpDir = await Deno.makeTempDir();
     const tarPath = join(tmpDir, assetName);
@@ -51,8 +43,7 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
     await Deno.rename(binSrc, dst);
   }
 
-  async post() {
+  override async post() {
     if (!(await cmdExists("lazygit"))) throw new Error("lazygit not found after install");
   }
 }
-

@@ -6,16 +6,18 @@ import $ from "jsr:@david/dax";
 export class LazyGitMacInstaller extends MacInstaller {
   readonly name = "lazygit-mac";
 
-  async run() {
+  override async run() {
     if (await cmdExists("lazygit")) {
       await log.info("install-software", "lazygit already installed; skipping");
       return;
     }
-    await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew list --versions lazygit >/dev/null 2>&1 || env HOMEBREW_NO_AUTO_UPDATE=1 brew install lazygit`;
+    const listed = await $`brew list --versions lazygit`.quiet().then(() => true, () => false);
+    if (!listed) {
+      await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew install lazygit`;
+    }
   }
 
-  async post() {
+  override async post() {
     if (!(await cmdExists("lazygit"))) throw new Error("lazygit not found after install");
   }
 }
-

@@ -1,13 +1,13 @@
 import $ from "jsr:@david/dax";
 import { UbuntuInstaller } from "./base.ts";
-import { binDir, cmdExists, ensureDir, homeDir } from "../core/utils.ts";
+import { binDir, cmdExists, ensureDir, runSudo } from "../core/utils.ts";
 import { log } from "../../log.ts";
 import { join } from "jsr:@std/path";
 
 export class LazyGitUbuntuInstaller extends UbuntuInstaller {
   readonly name = "lazygit-ubuntu";
 
-  async pre() { await ensureDir(binDir()); }
+  override async pre() { await ensureDir(binDir()); }
 
   async run() {
     if (await cmdExists("lazygit")) {
@@ -15,13 +15,25 @@ export class LazyGitUbuntuInstaller extends UbuntuInstaller {
       return;
     }
 
-    // Try apt, then fall back to GitHub release
+    // 1) Try distro package
     try {
       await this.aptUpdate();
       await this.aptInstall("lazygit");
       return;
     } catch {
       // fall through
+    }
+
+    // 2) Use official PPA on Ubuntu to avoid GitHub API rate limits
+    try {
+      await this.aptUpdate();
+      await this.aptInstall("software-properties-common");
+      await runSudo("add-apt-repository -y ppa:lazygit-team/release");
+      await this.aptUpdate();
+      await this.aptInstall("lazygit");
+      return;
+    } catch {
+      // fall through to upstream fallback
     }
 
     const os = Deno.build.os; // linux here
@@ -53,8 +65,7 @@ export class LazyGitUbuntuInstaller extends UbuntuInstaller {
     await Deno.rename(binSrc, dst);
   }
 
-  async post() {
+  override async post() {
     if (!(await cmdExists("lazygit"))) throw new Error("lazygit not found after install");
   }
 }
-

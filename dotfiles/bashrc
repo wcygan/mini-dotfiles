@@ -37,6 +37,10 @@ fi
 
 # Fallbacks for older distro fzf (no --bash). Skip if already loaded.
 if [ -z "${__FZF_INTEGRATION_LOADED-}" ]; then
+  # Load bash-completion core (if available) and fzf's completion on Ubuntu/Debian
+  [ -f "/usr/share/bash-completion/bash_completion" ] && . "/usr/share/bash-completion/bash_completion"
+  [ -f "/usr/share/bash-completion/completions/fzf" ] && . "/usr/share/bash-completion/completions/fzf"
+
   if command -v brew >/dev/null 2>&1; then
     FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
     if [ -n "$FZF_BREW_PREFIX" ]; then
