@@ -6,7 +6,7 @@ on:
 
 jobs:
   ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Build Ubuntu test image
@@ -15,7 +15,7 @@ jobs:
         run: docker run --rm -v "$PWD":/dotfiles mini-dotfiles:test-ubuntu
 
   fedora:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Host runner for the container
     container:
       image: fedora:40
     steps:
@@ -25,7 +25,7 @@ jobs:
         run: bats test/bats
 
   macos:
-    runs-on: macos-14
+    runs-on: macos-14  # ARM64 (Apple Silicon)
     steps:
       - uses: actions/checkout@v4
       - name: Install bats
