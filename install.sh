@@ -93,6 +93,26 @@ main() {
   ensure_in_repo
   ensure_deno
   deno task install
+
+  # Post-install: optional auto-reload of the current shell (opt-in)
+  # Use DOTFILES_RELOAD=1 to replace the current shell with a login shell.
+  # This is off by default because scripts cannot modify their parent shell
+  # environment portably and auto-replacing shells can surprise users.
+  if [ "${DOTFILES_RELOAD:-0}" = "1" ] && [ -n "${SHELL:-}" ] && [ -t 1 ]; then
+    echo "Reloading current shell as login shell (DOTFILES_RELOAD=1)…"
+    exec "$SHELL" -l
+  fi
+
+  # Otherwise, print a friendly hint.
+  echo
+  echo "Next steps: reload your shell so PATH changes apply."
+  echo "  Generic: exec \"\$SHELL\" -l"
+  # Best-effort hints for common shells
+  case "${SHELL:-}" in
+    *bash) echo "  bash:    exec bash -l    (# or: source ~/.bashrc)" ;;
+    *zsh)  echo "  zsh:     exec zsh -l     (# or: source ~/.zshrc)" ;;
+    *fish) echo "  fish:    exec fish -l" ;;
+  esac
 }
 
 main "$@"

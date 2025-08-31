@@ -142,3 +142,14 @@ teardown() {
   # Assert a JSON log entry shows the skip message
   jq -e 'select(.ev=="log" and .step=="install-software" and .msg=="lazygit already installed; skipping")' ./.logs/install.jsonl >/dev/null
 }
+
+@test "post-install logs reload hint (JSONL)" {
+  # Ensure a clean log file
+  rm -f ./.logs/install.jsonl || true
+
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Check for a post-install hint message, shell-agnostic
+  jq -e 'select(.ev=="log" and .step=="post-install" and (.msg|startswith("reload shell: ")))' ./.logs/install.jsonl >/dev/null
+}
