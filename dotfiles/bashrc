@@ -27,28 +27,56 @@ if command -v dircolors >/dev/null 2>&1; then
   eval "$(dircolors -b)"
 fi
 
-# fzf completion and keybindings (brew, distro, or user install)
-if command -v brew >/dev/null 2>&1; then
-  FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
-  if [ -n "$FZF_BREW_PREFIX" ]; then
-    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash"
-    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash"
+# fzf completion and keybindings (prefer self-printing integration when available)
+if command -v fzf >/dev/null 2>&1; then
+  # Newer fzf (>= 0.52) supports emitting integration scripts
+  if fzf --help 2>&1 | grep -q -- '--bash'; then
+    eval "$(fzf --bash)" 2>/dev/null && __FZF_INTEGRATION_LOADED=1 || true
   fi
 fi
 
-[ -f "/usr/share/fzf/shell/completion.bash" ] && . "/usr/share/fzf/shell/completion.bash"
-[ -f "/usr/share/fzf/shell/key-bindings.bash" ] && . "/usr/share/fzf/shell/key-bindings.bash"
+# Fallbacks for older distro fzf (no --bash). Skip if already loaded.
+if [ -z "${__FZF_INTEGRATION_LOADED-}" ]; then
+  if command -v brew >/dev/null 2>&1; then
+    FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+    if [ -n "$FZF_BREW_PREFIX" ]; then
+      [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash"
+      [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash"
+    fi
+  fi
 
-[ -f "/usr/share/fzf/completion.bash" ] && . "/usr/share/fzf/completion.bash"
-[ -f "/usr/share/fzf/key-bindings.bash" ] && . "/usr/share/fzf/key-bindings.bash"
+  [ -f "/etc/bash_completion.d/fzf" ] && . "/etc/bash_completion.d/fzf"
 
-[ -f "/usr/share/doc/fzf/examples/completion.bash" ] && . "/usr/share/doc/fzf/examples/completion.bash"
-[ -f "/usr/share/doc/fzf/examples/key-bindings.bash" ] && . "/usr/share/doc/fzf/examples/key-bindings.bash"
+  [ -f "/usr/share/fzf/shell/completion.bash" ] && . "/usr/share/fzf/shell/completion.bash"
+  [ -f "/usr/share/fzf/shell/key-bindings.bash" ] && . "/usr/share/fzf/shell/key-bindings.bash"
 
-[ -f "$HOME/.fzf/shell/completion.bash" ] && . "$HOME/.fzf/shell/completion.bash"
-[ -f "$HOME/.fzf/shell/key-bindings.bash" ] && . "$HOME/.fzf/shell/key-bindings.bash"
+  [ -f "/usr/share/fzf/completion.bash" ] && . "/usr/share/fzf/completion.bash"
+  [ -f "/usr/share/fzf/key-bindings.bash" ] && . "/usr/share/fzf/key-bindings.bash"
+
+  [ -f "/usr/share/doc/fzf/examples/completion.bash" ] && . "/usr/share/doc/fzf/examples/completion.bash"
+  [ -f "/usr/share/doc/fzf/examples/key-bindings.bash" ] && . "/usr/share/doc/fzf/examples/key-bindings.bash"
+
+  # Some distros gzip the example scripts; source them if present
+  if [ -f "/usr/share/doc/fzf/examples/completion.bash.gz" ] && command -v gzip >/dev/null 2>&1; then
+    . <(gzip -dc /usr/share/doc/fzf/examples/completion.bash.gz)
+  fi
+  if [ -f "/usr/share/doc/fzf/examples/key-bindings.bash.gz" ] && command -v gzip >/dev/null 2>&1; then
+    . <(gzip -dc /usr/share/doc/fzf/examples/key-bindings.bash.gz)
+  fi
+
+  [ -f "$HOME/.fzf/shell/completion.bash" ] && . "$HOME/.fzf/shell/completion.bash"
+  [ -f "$HOME/.fzf/shell/key-bindings.bash" ] && . "$HOME/.fzf/shell/key-bindings.bash"
+fi
 
 # Starship prompt (if installed)
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
+
+# Fallback prompt when Starship is unavailable
+# Shows '#' for root, '$' for others via \$
+if ! command -v starship >/dev/null 2>&1; then
+  PS1='\u@\h:\w \$ '
+fi
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

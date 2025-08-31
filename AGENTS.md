@@ -153,3 +153,11 @@
   admin/dev-mode.
 - Extending: add new pairs to the mapping in `installer/install-files.ts` and
   update Bats tests accordingly.
+
+## Shell Support Scope
+
+- Supported shells: Bash and Zsh only.
+- Supported OS: macOS and Linux only.
+- Not supported: Fish, PowerShell, and other shells (nu, xonsh, tcsh, etc.).
+- Starship setup: initialize in `dotfiles/bashrc` and `dotfiles/zshrc` only.
+- Do not add configs, symlinks, or installer steps for unsupported shells.

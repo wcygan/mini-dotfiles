@@ -12,7 +12,6 @@ try {
   let cmd = 'exec "$SHELL" -l';
   if (shell.includes("bash")) cmd = "exec bash -l";
   else if (shell.includes("zsh")) cmd = "exec zsh -l";
-  else if (shell.includes("fish")) cmd = "exec fish -l";
   await log.success("post-install", `reload shell: ${cmd}`);
 } catch (_) {
   // ignore env access errors

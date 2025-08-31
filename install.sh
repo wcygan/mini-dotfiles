@@ -111,7 +111,6 @@ main() {
   case "${SHELL:-}" in
     *bash) echo "  bash:    exec bash -l    (# or: source ~/.bashrc)" ;;
     *zsh)  echo "  zsh:     exec zsh -l     (# or: source ~/.zshrc)" ;;
-    *fish) echo "  fish:    exec fish -l" ;;
   esac
 }
 

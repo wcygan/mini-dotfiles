@@ -119,9 +119,56 @@ try {
     }
   };
 
-  // Try native package managers first; fall back to git installer
+  // Helper: detect Ubuntu to prefer upstream git installer over old apt fzf
+  const isUbuntu = await (async () => {
+    try {
+      const { stdout } = await $`sh -lc 'test -r /etc/os-release && . /etc/os-release && echo "$ID"'`
+        .quiet();
+      return stdout.trim().toLowerCase() === "ubuntu";
+    } catch {
+      return false;
+    }
+  })();
+
+  // Try preferred method per platform
   const haveFzf = await cmdExists("fzf");
-  if (!haveFzf) {
+  if (isUbuntu) {
+    // Always ensure latest upstream fzf on Ubuntu via git installer
+    await log.info(STEP, "using git-based installer for fzf on Ubuntu…");
+    const fzfDir = join(home, ".fzf");
+    try {
+      try {
+        // Update if exists; otherwise clone
+        await $`test -d ${fzfDir}`.quiet();
+        await $`git -C ${fzfDir} pull --ff-only`.quiet();
+      } catch {
+        try { await Deno.remove(fzfDir, { recursive: true }); } catch {}
+        await $`git clone --depth 1 https://github.com/junegunn/fzf.git ${fzfDir}`;
+      }
+      await $`${join(fzfDir, "install")} --key-bindings --completion --no-update-rc`;
+      try {
+        await $`sh -lc 'command -v fzf >/dev/null 2>&1'`;
+        // Presence verified; unified messaging handled below
+      } catch {
+        await log.warn(STEP, "fzf not found on PATH after git install");
+      }
+    } catch (e) {
+      await log.warn(
+        STEP,
+        `git-based fzf install on Ubuntu failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
+      // Fall back to other methods below if needed
+      if (!haveFzf) {
+        // Continue into package-manager path
+      } else {
+        // We already have some fzf; continue
+        return;
+      }
+    }
+  }
+
+  // If still missing (or non-Ubuntu), try native package managers first; fall back to git
+  if (!(await cmdExists("fzf"))) {
     const haveBrew = await cmdExists("brew");
     const haveApt = await cmdExists("apt-get");
     const haveDnf = await cmdExists("dnf");

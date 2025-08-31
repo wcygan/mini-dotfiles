@@ -121,6 +121,29 @@ teardown() {
   echo "$output" | grep -q "Software"
 }
 
+@test "fzf bash integration is available" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  # Ensure ~/.local/bin and ~/.fzf/bin are considered in case current shell PATH misses them
+  export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
+
+  # In a new login bash, verify keybinding function and completion registered
+  run bash -lc 'type -t fzf-file-widget >/dev/null 2>&1 && complete -p fzf >/dev/null 2>&1'
+  [ "$status" -eq 0 ]
+}
+
+@test "fzf zsh integration is available" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
+
+  # In zsh, functions are visible via the $functions hash
+  run zsh -lc '(( $+functions[fzf-file-widget] )) && (( $+functions[_fzf_complete] ))'
+  [ "$status" -eq 0 ]
+}
+
 @test "second run logs starship already installed (JSONL)" {
   # Start with a clean JSONL log for deterministic matching
   rm -f ./.logs/install.jsonl || true

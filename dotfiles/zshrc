@@ -8,8 +8,9 @@ setopt HIST_IGNORE_DUPS SHARE_HISTORY
 
 autoload -Uz compinit && compinit
 
-# Prompt (simple)
-PROMPT='%n@%m:%~ %# '
+# Prompt (simple): '#' for root, '$' for others
+# `%(#.#.$)` -> `#` if uid==0 else `$`
+PROMPT='%n@%m:%~ %(#.#.$) '
 
 # Aliases
 alias ll='ls -alF'
@@ -38,25 +39,44 @@ if [ -d "/usr/local/bin" ]; then
   export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 fi
 
-# fzf completion and keybindings (brew, distro, or user install)
-if command -v brew >/dev/null 2>&1; then
-  FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
-  if [ -n "$FZF_BREW_PREFIX" ]; then
-    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh"
-    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+# fzf completion and keybindings (prefer self-printing integration when available)
+if command -v fzf >/dev/null 2>&1; then
+  if fzf --help 2>&1 | grep -q -- '--zsh'; then
+    eval "$(fzf --zsh)" 2>/dev/null && __FZF_INTEGRATION_LOADED=1 || true
   fi
 fi
 
-[ -f "/usr/share/fzf/completion.zsh" ] && source "/usr/share/fzf/completion.zsh"
-[ -f "/usr/share/fzf/key-bindings.zsh" ] && source "/usr/share/fzf/key-bindings.zsh"
+# Fallbacks for older distro fzf (no --zsh). Skip if already loaded.
+if [ -z "${__FZF_INTEGRATION_LOADED-}" ]; then
+  if command -v brew >/dev/null 2>&1; then
+    FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+    if [ -n "$FZF_BREW_PREFIX" ]; then
+      [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh"
+      [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+    fi
+  fi
 
-[ -f "/usr/share/doc/fzf/examples/completion.zsh" ] && source "/usr/share/doc/fzf/examples/completion.zsh"
-[ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ] && source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+  [ -f "/usr/share/fzf/completion.zsh" ] && source "/usr/share/fzf/completion.zsh"
+  [ -f "/usr/share/fzf/key-bindings.zsh" ] && source "/usr/share/fzf/key-bindings.zsh"
 
-[ -f "$HOME/.fzf/shell/completion.zsh" ] && source "$HOME/.fzf/shell/completion.zsh"
-[ -f "$HOME/.fzf/shell/key-bindings.zsh" ] && source "$HOME/.fzf/shell/key-bindings.zsh"
+  [ -f "/usr/share/doc/fzf/examples/completion.zsh" ] && source "/usr/share/doc/fzf/examples/completion.zsh"
+  [ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ] && source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+
+  # Some distros gzip the example scripts; source them if present
+  if [ -f "/usr/share/doc/fzf/examples/completion.zsh.gz" ] && command -v gzip >/dev/null 2>&1; then
+    source <(gzip -dc /usr/share/doc/fzf/examples/completion.zsh.gz)
+  fi
+  if [ -f "/usr/share/doc/fzf/examples/key-bindings.zsh.gz" ] && command -v gzip >/dev/null 2>&1; then
+    source <(gzip -dc /usr/share/doc/fzf/examples/key-bindings.zsh.gz)
+  fi
+
+  [ -f "$HOME/.fzf/shell/completion.zsh" ] && source "$HOME/.fzf/shell/completion.zsh"
+  [ -f "$HOME/.fzf/shell/key-bindings.zsh" ] && source "$HOME/.fzf/shell/key-bindings.zsh"
+fi
 
 # Starship prompt (if installed)
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
