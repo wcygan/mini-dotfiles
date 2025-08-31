@@ -6,7 +6,10 @@
     "latest": "git pull --rebase && deno task install",
     "docker:ubuntu:build": "docker build -f test/docker/Dockerfile.ubuntu -t md:test-ubuntu .",
     "docker:fedora:build": "docker build -f test/docker/Dockerfile.fedora -t md:test-fedora .",
-    "docker:ubuntu:shell": "deno task docker:ubuntu:build && script -q /dev/null bash -lc \"docker run --rm -it -v '$PWD':/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-ubuntu -l\"",
-    "docker:fedora:shell": "deno task docker:fedora:build && script -q /dev/null bash -lc \"docker run --rm -it -v '$PWD':/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-fedora -l\""
+    "docker:ubuntu:shell": "deno task docker:ubuntu:build && script -q /dev/null bash -lc \"docker run --rm -it -v \"$(pwd)\":/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-ubuntu -l\"",
+    "docker:fedora:shell": "deno task docker:fedora:build && script -q /dev/null bash -lc \"docker run --rm -it -v \"$(pwd)\":/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-fedora -l\""
+    ,
+    "docker:ubuntu:test": "deno task docker:ubuntu:build && docker run --rm -v \"$(pwd)\":/dotfiles -w /dotfiles md:test-ubuntu",
+    "docker:fedora:test": "deno task docker:fedora:build && docker run --rm -v \"$(pwd)\":/dotfiles -w /dotfiles md:test-fedora"
   }
 }

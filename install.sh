@@ -65,18 +65,26 @@ ensure_in_repo() {
 }
 
 ensure_deno() {
-  if ! command -v deno >/dev/null 2>&1; then
-    echo "Deno not found. Installing..."
-    # Use non-interactive install and avoid modifying shell profiles here.
-    # We manage PATH via our dotfiles; see dotfiles/bashrc and dotfiles/zshrc.
-    curl -fsSL https://deno.land/install.sh | sh -s -- -y --no-modify-path
-
-    # Make deno visible to *this* process:
-    if [ -d "$HOME/.deno/bin" ]; then
+  # Robust detection: include the intended bin dir for verification only.
+  # This avoids false negatives before the user's shell PATH is updated.
+  VERIFY_PATH="$HOME/.deno/bin:$PATH"
+  if PATH="$VERIFY_PATH" command -v deno >/dev/null 2>&1; then
+    # Ensure this process can invoke deno without modifying user profiles.
+    if ! command -v deno >/dev/null 2>&1 && [ -d "$HOME/.deno/bin" ]; then
       PATH="$HOME/.deno/bin:$PATH"; export PATH
     fi
-  else
-    echo "Deno already installed at: $(command -v deno)"
+    echo "Deno already installed at: $(PATH="$VERIFY_PATH" command -v deno)"
+    return 0
+  fi
+
+  echo "Deno not found. Installing..."
+  # Use non-interactive install and avoid modifying shell profiles here.
+  # We manage PATH via our dotfiles; see dotfiles/bashrc and dotfiles/zshrc.
+  curl -fsSL https://deno.land/install.sh | sh -s -- -y --no-modify-path
+
+  # Make deno visible to *this* process:
+  if [ -d "$HOME/.deno/bin" ]; then
+    PATH="$HOME/.deno/bin:$PATH"; export PATH
   fi
 }
 
