@@ -129,7 +129,7 @@ teardown() {
   export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
 
   # In a new login bash, verify keybinding function and completion registered
-  run bash -lc 'type -t fzf-file-widget >/dev/null 2>&1 && complete -p fzf >/dev/null 2>&1'
+  run bash -ilc 'type -t fzf-file-widget >/dev/null 2>&1 && complete -p fzf >/dev/null 2>&1'
   [ "$status" -eq 0 ]
 }
 
@@ -140,7 +140,7 @@ teardown() {
   export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
 
   # In zsh, functions are visible via the $functions hash
-  run zsh -lc '(( $+functions[fzf-file-widget] )) && (( $+functions[_fzf_complete] ))'
+  run zsh -ilc '(( $+functions[fzf-file-widget] )) && (( $+functions[_fzf_complete] ))'
   [ "$status" -eq 0 ]
 }
 

@@ -131,7 +131,7 @@ try {
   })();
 
   // Try preferred method per platform
-  const haveFzf = await cmdExists("fzf");
+  let fzfEnsured = await cmdExists("fzf");
   if (isUbuntu) {
     // Always ensure latest upstream fzf on Ubuntu via git installer
     await log.info(STEP, "using git-based installer for fzf on Ubuntu…");
@@ -146,10 +146,8 @@ try {
         await $`git clone --depth 1 https://github.com/junegunn/fzf.git ${fzfDir}`;
       }
       await $`${join(fzfDir, "install")} --key-bindings --completion --no-update-rc`;
-      try {
-        await $`sh -lc 'command -v fzf >/dev/null 2>&1'`;
-        // Presence verified; unified messaging handled below
-      } catch {
+      fzfEnsured = await cmdExists("fzf");
+      if (!fzfEnsured) {
         await log.warn(STEP, "fzf not found on PATH after git install");
       }
     } catch (e) {
@@ -157,18 +155,12 @@ try {
         STEP,
         `git-based fzf install on Ubuntu failed: ${e instanceof Error ? e.message : String(e)}`,
       );
-      // Fall back to other methods below if needed
-      if (!haveFzf) {
-        // Continue into package-manager path
-      } else {
-        // We already have some fzf; continue
-        return;
-      }
+      // Fall back to other methods below if needed; do nothing here
     }
   }
 
   // If still missing (or non-Ubuntu), try native package managers first; fall back to git
-  if (!(await cmdExists("fzf"))) {
+  if (!fzfEnsured) {
     const haveBrew = await cmdExists("brew");
     const haveApt = await cmdExists("apt-get");
     const haveDnf = await cmdExists("dnf");
