@@ -6,6 +6,11 @@ set -o noclobber
 # Paths
 export PATH="$HOME/.local/bin:$PATH"
 
+# Include user fzf bin (git-based install) if present
+if [ -d "$HOME/.fzf/bin" ]; then
+  export PATH="$HOME/.fzf/bin:$PATH"
+fi
+
 # Aliases
 alias ll='ls -alF'
 alias la='ls -A'
@@ -25,3 +30,21 @@ fi
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init bash)"
 fi
+
+# fzf completion and keybindings (brew, distro, or user install)
+if command -v brew >/dev/null 2>&1; then
+  FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+  if [ -n "$FZF_BREW_PREFIX" ]; then
+    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/completion.bash"
+    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash" ] && . "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.bash"
+  fi
+fi
+
+[ -f "/usr/share/fzf/completion.bash" ] && . "/usr/share/fzf/completion.bash"
+[ -f "/usr/share/fzf/key-bindings.bash" ] && . "/usr/share/fzf/key-bindings.bash"
+
+[ -f "/usr/share/doc/fzf/examples/completion.bash" ] && . "/usr/share/doc/fzf/examples/completion.bash"
+[ -f "/usr/share/doc/fzf/examples/key-bindings.bash" ] && . "/usr/share/doc/fzf/examples/key-bindings.bash"
+
+[ -f "$HOME/.fzf/shell/completion.bash" ] && . "$HOME/.fzf/shell/completion.bash"
+[ -f "$HOME/.fzf/shell/key-bindings.bash" ] && . "$HOME/.fzf/shell/key-bindings.bash"

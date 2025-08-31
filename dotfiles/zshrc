@@ -21,6 +21,11 @@ if [ -f "$HOME/.aliases.sh" ]; then
   source "$HOME/.aliases.sh"
 fi
 
+# Include user fzf bin (git-based install) if present
+if [ -d "$HOME/.fzf/bin" ]; then
+  export PATH="$HOME/.fzf/bin:$PATH"
+fi
+
 # Homebrew PATH (macOS) if available
 if [ -d "/opt/homebrew/bin" ]; then
   export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
@@ -33,3 +38,21 @@ fi
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
+
+# fzf completion and keybindings (brew, distro, or user install)
+if command -v brew >/dev/null 2>&1; then
+  FZF_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+  if [ -n "$FZF_BREW_PREFIX" ]; then
+    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/completion.zsh"
+    [ -f "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ] && source "$FZF_BREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+  fi
+fi
+
+[ -f "/usr/share/fzf/completion.zsh" ] && source "/usr/share/fzf/completion.zsh"
+[ -f "/usr/share/fzf/key-bindings.zsh" ] && source "/usr/share/fzf/key-bindings.zsh"
+
+[ -f "/usr/share/doc/fzf/examples/completion.zsh" ] && source "/usr/share/doc/fzf/examples/completion.zsh"
+[ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ] && source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+
+[ -f "$HOME/.fzf/shell/completion.zsh" ] && source "$HOME/.fzf/shell/completion.zsh"
+[ -f "$HOME/.fzf/shell/key-bindings.zsh" ] && source "$HOME/.fzf/shell/key-bindings.zsh"
