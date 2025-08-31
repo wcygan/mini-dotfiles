@@ -1,0 +1,7 @@
+# mini-dotfiles: bash_profile
+
+# Ensure login shells load the same settings as interactive shells
+if [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
+

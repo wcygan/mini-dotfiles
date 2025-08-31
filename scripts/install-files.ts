@@ -34,6 +34,7 @@ try {
   const configDir = Deno.env.get("XDG_CONFIG_HOME") ?? join(home, ".config");
   const mapping: Array<[string, string]> = [
     [join(repo, "dotfiles", "bashrc"), join(home, ".bashrc")],
+    [join(repo, "dotfiles", "bash_profile"), join(home, ".bash_profile")],
     [join(repo, "dotfiles", "zshrc"), join(home, ".zshrc")],
     [join(repo, "dotfiles", "gitconfig"), join(home, ".gitconfig")],
     [join(repo, "dotfiles", "tmux.conf"), join(home, ".tmux.conf")],
