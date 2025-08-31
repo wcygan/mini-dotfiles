@@ -4,6 +4,7 @@
 set -o noclobber
 
 # Paths
+export PATH="$HOME/.deno/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
 # Include user fzf bin (git-based install) if present

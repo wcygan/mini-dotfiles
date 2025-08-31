@@ -67,7 +67,9 @@ ensure_in_repo() {
 ensure_deno() {
   if ! command -v deno >/dev/null 2>&1; then
     echo "Deno not found. Installing..."
-    curl -fsSL https://deno.land/install.sh | sh
+    # Use non-interactive install and avoid modifying shell profiles here.
+    # We manage PATH via our dotfiles; see dotfiles/bashrc and dotfiles/zshrc.
+    curl -fsSL https://deno.land/install.sh | sh -s -- -y --no-modify-path
 
     # Make deno visible to *this* process:
     if [ -d "$HOME/.deno/bin" ]; then
