@@ -1,5 +1,6 @@
 {
   "tasks": {
-    "install": "./installer/main.ts"
+    "install": "./installer/main.ts",
+    "curl-install": "curl -fsSL https://raw.githubusercontent.com/wcygan/mini-dotfiles/refs/heads/main/install.sh | sh"
   }
 }
