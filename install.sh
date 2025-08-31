@@ -9,3 +9,6 @@ if ! command -v deno >/dev/null 2>&1; then
 else
   echo "Deno already installed at: $(command -v deno)"
 fi
+
+# Delegate to Deno for installation
+deno task install
