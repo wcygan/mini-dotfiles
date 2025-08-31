@@ -1,50 +1,78 @@
 #!/usr/bin/env sh
 
+# mini-dotfiles installer
+# - Ensures we are in github.com/wcygan/mini-dotfiles (clones otherwise)
+# - Installs Deno if missing
+# - Delegates to `deno task install` for full installation
+#
+# Notes:
+# 1. TypeScript has less "Cognitive Load" compared to Bash
+#   - Ref: https://github.com/zakirullin/cognitive-load
+# 2. I like using Deno for Scripting purposes
+#   - Ref: https://deno.com/learn/scripts-clis
+
 set -eu
 
-# Ensure we're operating inside the correct git repository.
-# If not, clone it, cd into it, and re-run this script.
-REPO_CANON="github.com/wcygan/mini-dotfiles"
+# ---- Config ---------------------------------------------------------------
+REPO_HOST="github.com"
+REPO_OWNER="wcygan"
+REPO_NAME="mini-dotfiles"
+REPO_CANON="${REPO_HOST}/${REPO_OWNER}/${REPO_NAME}"
+REPO_SSH="git@${REPO_HOST}:${REPO_OWNER}/${REPO_NAME}.git"
 
-in_target_repo=false
-if command -v git >/dev/null 2>&1; then
-  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
-    if [ -n "${remote_url}" ]; then
-      # Normalize remote URL to the form: github.com/user/repo
-      canon_url="$(printf %s "${remote_url}" | sed -E 's#^[a-zA-Z]+://##; s#^git@##; s#:#/#')"
-      case "${canon_url}" in
-        *.git) canon_url=${canon_url%.git} ;;
-      esac
-      if [ "${canon_url}" = "${REPO_CANON}" ]; then
-        in_target_repo=true
+# ---- Helpers --------------------------------------------------------------
+normalize_git_url() {
+  # Convert various git remote URL formats to host/user/repo (no .git)
+  # Examples:
+  #   git@github.com:user/repo.git       -> github.com/user/repo
+  #   https://github.com/user/repo.git   -> github.com/user/repo
+  url="$1"
+  canon="$(printf %s "${url}" | sed -E 's#^[a-zA-Z]+://##; s#^git@##; s#:#/#')"
+  case "${canon}" in
+    *.git) canon=${canon%.git} ;;
+  esac
+  printf %s "${canon}"
+}
+
+ensure_in_repo() {
+  # If not inside the target repo, clone it and re-run this script.
+  if command -v git >/dev/null 2>&1; then
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
+      if [ -n "${remote_url}" ]; then
+        canon_url="$(normalize_git_url "${remote_url}")"
+        if [ "${canon_url}" = "${REPO_CANON}" ]; then
+          return 0
+        fi
       fi
     fi
-  fi
-fi
-
-if [ "${in_target_repo}" != "true" ]; then
-  echo "Not in ${REPO_CANON}. Cloning and re-running installer..."
-  if ! command -v git >/dev/null 2>&1; then
-    echo "git is required to clone ${REPO_CANON}. Please install git and retry."
+    echo "Not in ${REPO_CANON}. Cloning and re-running installer..."
+    if [ ! -d "${REPO_NAME}/.git" ]; then
+      git clone "${REPO_SSH}"
+    else
+      echo "Directory '${REPO_NAME}' already exists. Reusing it."
+    fi
+    cd "${REPO_NAME}"
+    exec ./install.sh
+  else
+    echo "git is required to clone ${REPO_CANON}. Please install git and retry." >&2
     exit 1
   fi
-  if [ ! -d "mini-dotfiles/.git" ]; then
-    git clone git@github.com:wcygan/mini-dotfiles.git
+}
+
+ensure_deno() {
+  if ! command -v deno >/dev/null 2>&1; then
+    echo "Deno not found. Installing..."
+    curl -fsSL https://deno.land/install.sh | sh
   else
-    echo "Directory 'mini-dotfiles' already exists. Reusing it."
+    echo "Deno already installed at: $(command -v deno)"
   fi
-  cd mini-dotfiles
-  exec ./install.sh
-fi
+}
 
-# Install Deno if not already available on PATH
-if ! command -v deno >/dev/null 2>&1; then
-  echo "Deno not found. Installing..."
-  curl -fsSL https://deno.land/install.sh | sh
-else
-  echo "Deno already installed at: $(command -v deno)"
-fi
+main() {
+  ensure_in_repo
+  ensure_deno
+  deno task install
+}
 
-# Delegate to Deno for installation
-deno task install
+main "$@"
