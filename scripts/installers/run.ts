@@ -2,13 +2,12 @@
 import { detectOS, runInstaller } from "./core/types.ts";
 import { installersFor } from "./registry.ts";
 import { log } from "../log.ts";
-import { binDir, ensureDir, safePATH } from "./core/utils.ts";
+import { binDir, ensureDir } from "./core/utils.ts";
 
 const STEP = "install-software";
 await log.stepBegin(STEP);
 try {
-  // Keep PATH safe and ensure bin dir exists for this process
-  try { Deno.env.set("PATH", safePATH()); } catch { /* ignore */ }
+  // Ensure bin dir exists for this process
   await ensureDir(binDir());
 
   const os = await detectOS();

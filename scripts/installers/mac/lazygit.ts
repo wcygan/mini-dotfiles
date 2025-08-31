@@ -18,6 +18,6 @@ export class LazyGitMacInstaller extends MacInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("lazygit"))) throw new Error("lazygit not found after install");
+    if (!(await cmdExists("lazygit"))) throw new Error("verify: lazygit missing on PATH");
   }
 }

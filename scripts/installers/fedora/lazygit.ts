@@ -1,8 +1,8 @@
-import $ from "jsr:@david/dax";
 import { FedoraInstaller } from "./base.ts";
 import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
 import { log } from "../../log.ts";
-import { join } from "jsr:@std/path";
+import $ from "jsr:@david/dax";
+import { installTarballBinary, ghLatestRedirect } from "../core/toolkit.ts";
 
 export class LazyGitFedoraInstaller extends FedoraInstaller {
   readonly name = "lazygit-fedora";
@@ -30,28 +30,20 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       }
     }
 
-    const os = Deno.build.os; // linux here
-    const arch = Deno.build.arch; // x86_64 | aarch64
-    const assetOS = os === "linux" ? "Linux" : "";
-    const assetArch = arch === "x86_64" ? "x86_64" : arch === "aarch64" ? "arm64" : "";
-    if (!assetOS || !assetArch) throw new Error(`unsupported platform ${os}/${arch}`);
-    // Avoid GitHub API rate limits by using the versionless latest/download URL
-    const assetName = `lazygit_${assetOS}_${assetArch}.tar.gz`;
-    const url = `https://github.com/jesseduffield/lazygit/releases/latest/download/${assetName}`;
-
-    const tmpDir = await Deno.makeTempDir();
-    const tarPath = join(tmpDir, assetName);
-    await $`curl -fsSL -o ${tarPath} ${url}`;
-    await $`tar -xzf ${tarPath} -C ${tmpDir}`;
-    const binSrc = join(tmpDir, "lazygit");
-    await Deno.chmod(binSrc, 0o755).catch(() => {});
-
-    const dst = join(binDir(), "lazygit");
-    try { await Deno.remove(dst); } catch {}
-    await Deno.rename(binSrc, dst);
+    const arch = Deno.build.arch === "x86_64" ? "x86_64"
+              : Deno.build.arch === "aarch64" ? "arm64"
+              : "";
+    if (!arch) throw new Error(`unsupported arch ${Deno.build.arch}`);
+    const eff = await ghLatestRedirect("jesseduffield/lazygit");
+    const tag = eff.split("/").pop() ?? ""; // e.g., v0.54.2
+    const version = tag.replace(/^v/, "");
+    const url = version
+      ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_Linux_${arch}.tar.gz`
+      : `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_Linux_${arch}.tar.gz`;
+    await installTarballBinary({ url, binName: "lazygit" });
   }
 
   override async post() {
-    if (!(await cmdExists("lazygit"))) throw new Error("lazygit not found after install");
+    if (!(await cmdExists("lazygit"))) throw new Error("verify: lazygit missing on PATH");
   }
 }

@@ -233,6 +233,66 @@ export function installersFor(os: OS) {
 
 ---
 
+Here’s a concrete way you could update **AGENTS.md** to codify the preference for minimal cognitive load. Think of it as rules the repo’s “installation agents” must follow, so future contributors don’t re-introduce scattered complexity.
+
+---
+
+## Cognitive Load Principles
+
+To keep this repository approachable and maintainable, all agents and installers MUST adhere to a **minimal cognitive load** philosophy. This means:
+
+1. **One Mental Model per Class of Tasks**
+
+  * All installers follow the same shape:
+
+    ```
+    if already installed → return
+    else try system package manager
+    else fallback (helper)
+    verify postcondition
+    ```
+  * Avoid special-case branches that deviate from this model unless strictly necessary.
+
+2. **Deep, Not Wide**
+
+  * Shared helpers (e.g. `ensureUpstreamFzf`, `installTarballBinary`) live in `scripts/installers/core/toolkit.ts`.
+  * Duplicated flows (git-based fzf bootstrap, GitHub tarball download/unpack) must call into these helpers rather than re-implement them.
+  * Prefer depth (strong abstractions, fewer moving parts) over breadth (lots of nearly-identical implementations).
+
+3. **Single Source of Truth**
+
+  * Environment setup (PATH hardening, binDir creation) happens once in the entrypoint (`scripts/main.ts`), not scattered across installers.
+  * Post-install verification messages are uniform: `throw new Error("verify: <tool> missing on PATH");`.
+
+4. **Explicit Over Implicit**
+
+  * Every `run()` clearly lists its steps. Each step should be 1–2 lines, ideally invoking a helper.
+  * If a step requires OS-specific handling, document the reason inline.
+
+5. **Tests Enforce the Contract**
+
+  * Bats tests check the observable behavior (tool ends up on PATH).
+  * Tests must not duplicate setup logic—they import the same helpers.
+
+6. **Consistency First**
+
+  * Prefer consistent naming (`install-<tool>-<os>`) across all installers.
+  * Logging always uses the parent step `"install-software"` with child steps keyed by installer name.
+
+---
+
+## Why
+
+By codifying these rules, new contributors (and future you) only have to memorize:
+
+* *Where things live* (`toolkit.ts` for shared logic, `installers/<os>/<tool>.ts` for orchestration).
+* *One lifecycle shape* (pre → run → post).
+* *One invariant* (binary must be present on PATH after install).
+
+Everything else should be discoverable, predictable, and boring.
+
+---
+
 ## Acceptance Criteria (per new tool)
 
 * ✅ Installs cleanly on Ubuntu, Fedora, macOS (or explicitly documented as N/A for an OS).

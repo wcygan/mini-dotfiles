@@ -1,15 +1,12 @@
 import $ from "jsr:@david/dax";
 import { FedoraInstaller } from "./base.ts";
-import { binDir, cmdExists, ensureDir, safePATH } from "../core/utils.ts";
+import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
 import { log } from "../../log.ts";
 
 export class StarshipFedoraInstaller extends FedoraInstaller {
   readonly name = "starship-fedora";
 
-  override async pre() {
-    await ensureDir(binDir());
-    try { Deno.env.set("PATH", safePATH()); } catch { /* ignore */ }
-  }
+  override async pre() { await ensureDir(binDir()); }
 
   async run() {
     if (await cmdExists("starship")) {
@@ -22,6 +19,6 @@ export class StarshipFedoraInstaller extends FedoraInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
+    if (!(await cmdExists("starship"))) throw new Error("verify: starship missing on PATH");
   }
 }

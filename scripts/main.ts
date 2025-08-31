@@ -2,6 +2,14 @@
 
 import { log } from "./log.ts";
 
+// Harden PATH exactly once for the whole run.
+try {
+  const { safePATH } = await import("./installers/core/utils.ts");
+  Deno.env.set("PATH", safePATH());
+} catch {
+  // env may be locked; best effort
+}
+
 // Run installers in sequence
 await import("./install-files.ts");
 await import("./installers/run.ts");

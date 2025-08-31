@@ -8,6 +8,8 @@ setup() {
   export REPO_ROOT="$(cd "$(dirname "${BATS_TEST_FILENAME}")/../.." && pwd)"
   export HOME="$(mktemp -d)"            # isolate HOME
   export XDG_CONFIG_HOME="$HOME/.config"
+  # Ensure local tool bins are visible across tests
+  export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
   
   # Configure git for CI environments
   git config --global user.email "test@example.com" 2>/dev/null || true
@@ -67,8 +69,6 @@ teardown() {
   run ./install.sh
   [ "$status" -eq 0 ]
 
-  # Add local bin to PATH for the current shell session
-  export PATH="$HOME/.local/bin:$PATH"
   command -v starship >/dev/null 2>&1
   starship --version >/dev/null 2>&1
 }
@@ -77,8 +77,6 @@ teardown() {
   run ./install.sh
   [ "$status" -eq 0 ]
 
-  # Include local bin for fallback installs
-  export PATH="$HOME/.local/bin:$PATH"
   command -v lazygit >/dev/null 2>&1
   lazygit --version >/dev/null 2>&1
 }
@@ -125,9 +123,6 @@ teardown() {
   run ./install.sh
   [ "$status" -eq 0 ]
 
-  # Ensure ~/.local/bin and ~/.fzf/bin are considered in case current shell PATH misses them
-  export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
-
   # In a new login bash, verify keybinding function and completion registered
   run bash -ilc 'type -t fzf-file-widget >/dev/null 2>&1 && complete -p fzf >/dev/null 2>&1'
   [ "$status" -eq 0 ]
@@ -136,8 +131,6 @@ teardown() {
 @test "fzf zsh integration is available" {
   run ./install.sh
   [ "$status" -eq 0 ]
-
-  export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
 
   # In zsh, functions are visible via the $functions hash
   run zsh -ilc '(( $+functions[fzf-file-widget] )) && (( $+functions[_fzf_complete] ))'

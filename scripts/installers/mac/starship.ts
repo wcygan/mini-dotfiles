@@ -18,6 +18,6 @@ export class StarshipMacInstaller extends MacInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
+    if (!(await cmdExists("starship"))) throw new Error("verify: starship missing on PATH");
   }
 }

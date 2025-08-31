@@ -6,6 +6,7 @@ export class FzfMacInstaller extends MacInstaller {
   readonly name = "fzf-mac";
 
   override async run() {
+    if (await cmdExists("fzf")) return;
     // Check if fzf is installed via brew; install if missing
     const listed = await $`brew list --versions fzf`.quiet().then(() => true, () => false);
     if (!listed) {
@@ -16,6 +17,6 @@ export class FzfMacInstaller extends MacInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("fzf"))) throw new Error("fzf not found on PATH after install");
+    if (!(await cmdExists("fzf"))) throw new Error("verify: fzf missing on PATH");
   }
 }

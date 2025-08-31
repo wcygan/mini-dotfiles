@@ -1,15 +1,12 @@
 import $ from "jsr:@david/dax";
 import { UbuntuInstaller } from "./base.ts";
-import { binDir, cmdExists, ensureDir, safePATH } from "../core/utils.ts";
+import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
 import { log } from "../../log.ts";
 
 export class StarshipUbuntuInstaller extends UbuntuInstaller {
   readonly name = "starship-ubuntu";
 
-  override async pre() {
-    await ensureDir(binDir());
-    try { Deno.env.set("PATH", safePATH()); } catch { /* ignore */ }
-  }
+  override async pre() { await ensureDir(binDir()); }
 
   async run() {
     if (await cmdExists("starship")) {
@@ -21,6 +18,6 @@ export class StarshipUbuntuInstaller extends UbuntuInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("starship"))) throw new Error("starship not found after install");
+    if (!(await cmdExists("starship"))) throw new Error("verify: starship missing on PATH");
   }
 }
