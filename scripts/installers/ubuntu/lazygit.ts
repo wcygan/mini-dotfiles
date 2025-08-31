@@ -13,13 +13,25 @@ export class LazyGitUbuntuInstaller extends UbuntuInstaller {
       return;
     }
 
-    // 1) Try distro package (Ubuntu 25.10+/Debian 13+)
-    try {
-      await this.aptUpdate();
-      await this.aptInstall("lazygit");
-      return;
-    } catch {
-      // fall through
+    // Decide installation method based on Ubuntu VERSION_ID from /etc/os-release
+    const ver = await this.ubuntuVersionId();
+    const aptSupported = ver ? this.versionGte(ver, "25.10") : false;
+    if (aptSupported) {
+      await this.info(`Ubuntu ${ver} detected (>= 25.10): installing via apt`);
+      try {
+        await this.aptUpdate();
+        await this.aptInstall("lazygit");
+        return;
+      } catch {
+        // fall through to upstream if apt path fails for any reason
+        await this.warn("apt path failed; falling back to upstream tarball");
+      }
+    } else {
+      await this.info(
+        ver
+          ? `Ubuntu ${ver} detected (< 25.10): installing from GitHub release`
+          : "Ubuntu VERSION_ID unknown: installing from GitHub release",
+      );
     }
 
     // 2) Upstream tarball from latest. Prefer versioned URL via redirect.
