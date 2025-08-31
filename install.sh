@@ -64,10 +64,16 @@ ensure_deno() {
   if ! command -v deno >/dev/null 2>&1; then
     echo "Deno not found. Installing..."
     curl -fsSL https://deno.land/install.sh | sh
+
+    # Make deno visible to *this* process:
+    if [ -d "$HOME/.deno/bin" ]; then
+      PATH="$HOME/.deno/bin:$PATH"; export PATH
+    fi
   else
     echo "Deno already installed at: $(command -v deno)"
   fi
 }
+
 
 main() {
   ensure_in_repo
