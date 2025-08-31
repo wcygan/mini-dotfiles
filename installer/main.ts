@@ -1,5 +1,5 @@
 #!/usr/bin/env -S deno run --allow-all
 
-import $ from "jsr:@david/dax";
-
-await $`echo Hello World`;
+// Run installers in sequence
+await import("./install-files.ts");
+await import("./install-software.ts");
