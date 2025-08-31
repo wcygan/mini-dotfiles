@@ -1,0 +1,9 @@
+FROM fedora:40
+
+RUN dnf -y install \
+  bash zsh git curl \
+  bats jq \
+  && dnf clean all
+
+WORKDIR /dotfiles
+CMD ["bats","test/bats"]

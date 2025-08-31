@@ -1,0 +1,34 @@
+name: mini-dotfiles-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Ubuntu test image
+        run: docker build -f test/docker/Dockerfile.ubuntu -t mini-dotfiles:test-ubuntu .
+      - name: Run tests (Ubuntu)
+        run: docker run --rm -v "$PWD":/dotfiles mini-dotfiles:test-ubuntu
+
+  fedora:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:40
+    steps:
+      - run: dnf -y install git curl bash zsh bats jq
+      - uses: actions/checkout@v4
+      - name: Run tests (Fedora container)
+        run: bats test/bats
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bats
+        run: brew install bats-core || true
+      - name: Run tests (macOS)
+        run: bats test/bats
