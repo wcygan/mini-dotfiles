@@ -6,7 +6,7 @@ on:
 
 jobs:
   ubuntu:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-25.10
     steps:
       - uses: actions/checkout@v4
       - name: Build Ubuntu test image
@@ -17,7 +17,7 @@ jobs:
           bash -lc 'git config --system --add safe.directory /dotfiles && bats test/bats'
 
   fedora:
-    runs-on: ubuntu-24.04 # Host runner for the container
+    runs-on: ubuntu-25.10 # Host runner for the container
     container:
       image: fedora:40
     steps:
