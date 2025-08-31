@@ -41,6 +41,17 @@
 - CI: GitHub Actions runs tests on Ubuntu, Fedora (container), and macOS; ensure
   cross-platform behavior.
 
+### Test Suite Details (`/test`)
+
+- Location: `test/bats/test_installer.bats`.
+- Isolation: tests run with a temporary `HOME` via `mktemp -d` to avoid touching the real user profile.
+- Current assertions:
+  - Pretty output markers appear (and order: "Files" before "Software").
+  - Deno becomes available in PATH after install.
+  - Idempotent second run.
+  - Symlink checks: each expected dotfile is a symlink (`-L`) and contents match the repo source via `cmp -s`.
+- Prefer stable checks on JSON logs when practical: see Logging Mandate for `jq` examples against `./.logs/install.jsonl`.
+
 ## Commit & Pull Request Guidelines
 
 - Commits: Short, imperative, lowercase subject (e.g., `installers`, `ci setup`,
@@ -89,3 +100,20 @@
     throw err;
   }
   ```
+
+## Symlink Strategy (installer/install-files.ts)
+
+- Goal: manage dotfiles as symlinks pointing to files tracked in `dotfiles/`.
+- Default mapping:
+  - `dotfiles/bashrc` → `$HOME/.bashrc`
+  - `dotfiles/zshrc` → `$HOME/.zshrc`
+  - `dotfiles/gitconfig` → `$HOME/.gitconfig`
+  - `dotfiles/tmux.conf` → `$HOME/.tmux.conf`
+  - `dotfiles/aliases.sh` → `$HOME/.aliases.sh`
+- Behavior:
+  - Create parent directories as needed.
+  - If target exists and is the correct symlink, do nothing (idempotent).
+  - If target is a wrong symlink or a regular file, remove it and recreate pointing to the repo file.
+  - Uses Deno `lstat`, `readLink`, and `symlink({ type: "file" })` for file links.
+- Platforms: macOS/Linux are primary targets; Windows symlinks may require admin/dev-mode.
+- Extending: add new pairs to the mapping in `installer/install-files.ts` and update Bats tests accordingly.

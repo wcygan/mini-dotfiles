@@ -44,6 +44,21 @@ teardown() {
   [ "$files_line" -lt "$software_line" ]
 }
 
+@test "install-files symlinks dotfiles into HOME" {
+  run ./install.sh
+  [ "$status" -eq 0 ]
+
+  for f in .bashrc .zshrc .gitconfig .tmux.conf .aliases.sh; do
+    [ -L "$HOME/$f" ]
+  done
+
+  cmp -s "$HOME/.bashrc"     "$REPO_ROOT/dotfiles/bashrc"
+  cmp -s "$HOME/.zshrc"      "$REPO_ROOT/dotfiles/zshrc"
+  cmp -s "$HOME/.gitconfig"  "$REPO_ROOT/dotfiles/gitconfig"
+  cmp -s "$HOME/.tmux.conf"  "$REPO_ROOT/dotfiles/tmux.conf"
+  cmp -s "$HOME/.aliases.sh" "$REPO_ROOT/dotfiles/aliases.sh"
+}
+
 @test "deno is available in the same process after install" {
   # First run the installer
   ./install.sh >/dev/null 2>&1
