@@ -49,7 +49,7 @@ export interface Installer {
 
 * `UbuntuInstaller` exposes `aptUpdate()` and `aptInstall(...pkgs)`.
 * `FedoraInstaller` exposes `dnfInstall(...pkgs)`.
-* `MacInstaller` ensures Homebrew and defers to `brew` in concrete classes.
+* `MacInstaller` ensures Homebrew and exposes Homebrew helpers: `brewInstalled(name)`, `brewInstall(...pkgs)`, `brewInstallCask(...casks)`, `brewPrefix()`, `brewTap(tap)`.
 
 Each concrete installer extends one of these bases and implements `name`, `run`, and `post` (and optionally `pre`/`shouldRun`).
 
@@ -130,7 +130,7 @@ Each concrete installer extends one of these bases and implements `name`, `run`,
 
 * `scripts/ubuntu/base.ts`: exposes `aptUpdate()`/`aptInstall()`.
 * `scripts/fedora/base.ts`: exposes `dnfInstall()`.
-* `scripts/mac/base.ts`: ensures Homebrew.
+* `scripts/mac/base.ts`: ensures Homebrew and exposes `brewInstalled`, `brewInstall`, `brewInstallCask`, `brewPrefix`, `brewTap` helpers.
 
 ### Concrete Installer (template)
 

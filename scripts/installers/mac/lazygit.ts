@@ -1,6 +1,5 @@
 import { MacInstaller } from "./base.ts";
 import { cmdExists } from "../core/utils.ts";
-import $ from "jsr:@david/dax";
 
 export class LazyGitMacInstaller extends MacInstaller {
   readonly name = "lazygit-mac";
@@ -10,10 +9,7 @@ export class LazyGitMacInstaller extends MacInstaller {
       await this.info("lazygit already installed; skipping");
       return;
     }
-    const listed = await $`brew list --versions lazygit`.quiet().then(() => true, () => false);
-    if (!listed) {
-      await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew install lazygit`;
-    }
+    if (!(await this.brewInstalled("lazygit"))) await this.brewInstall("lazygit");
   }
 
   override async post() {

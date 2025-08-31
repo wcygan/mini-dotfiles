@@ -7,13 +7,11 @@ export class FzfMacInstaller extends MacInstaller {
 
   override async run() {
     if (await cmdExists("fzf")) return;
-    // Check if fzf is installed via brew; install if missing
-    const listed = await $`brew list --versions fzf`.quiet().then(() => true, () => false);
-    if (!listed) {
-      await $`env HOMEBREW_NO_AUTO_UPDATE=1 brew install fzf`;
+    if (!(await this.brewInstalled("fzf"))) {
+      await this.brewInstall("fzf");
     }
-    const { stdout: prefix } = await $`brew --prefix`.quiet();
-    await $`${prefix.trim()}/opt/fzf/install --key-bindings --completion --no-update-rc`;
+    const prefix = await this.brewPrefix();
+    await $`${prefix}/opt/fzf/install --key-bindings --completion --no-update-rc`;
   }
 
   override async post() {
