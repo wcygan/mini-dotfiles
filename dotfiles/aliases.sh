@@ -17,6 +17,7 @@ alias rpath='rehash_path'
 # Git
 alias gs='git status'
 alias gd='git diff'
+alias gb='git branch'
 alias gc='git commit'
 alias gaa='git add .'
 alias gp='git push'

@@ -3,13 +3,21 @@
     "install": "./scripts/main.ts",
     "curl-install": "curl -fsSL https://raw.githubusercontent.com/wcygan/mini-dotfiles/refs/heads/main/install.sh | sh",
     "test": "bats test/bats/test_installer.bats",
+    "test:mac": "deno task test",
     "latest": "git pull --rebase && deno task install",
     "docker:ubuntu:build": "docker build -f test/docker/Dockerfile.ubuntu -t md:test-ubuntu .",
     "docker:fedora:build": "docker build -f test/docker/Dockerfile.fedora -t md:test-fedora .",
+    "docker:ubuntu:bare:build": "docker build -f test/docker/Dockerfile.ubuntu.bare -t md:bare-ubuntu .",
+    "docker:fedora:bare:build": "docker build -f test/docker/Dockerfile.fedora.bare -t md:bare-fedora .",
     "docker:ubuntu:shell": "deno task docker:ubuntu:build && script -q /dev/null bash -lc \"docker run --rm -it -v \"$(pwd)\":/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-ubuntu -l\"",
     "docker:fedora:shell": "deno task docker:fedora:build && script -q /dev/null bash -lc \"docker run --rm -it -v \"$(pwd)\":/dotfiles -w /dotfiles --entrypoint /bin/bash md:test-fedora -l\""
     ,
     "docker:ubuntu:test": "deno task docker:ubuntu:build && docker run --rm -v \"$(pwd)\":/dotfiles -w /dotfiles md:test-ubuntu",
-    "docker:fedora:test": "deno task docker:fedora:build && docker run --rm -v \"$(pwd)\":/dotfiles -w /dotfiles md:test-fedora"
+    "docker:fedora:test": "deno task docker:fedora:build && docker run --rm -v \"$(pwd)\":/dotfiles -w /dotfiles md:test-fedora",
+    "docker:ubuntu:bare:shell": "deno task docker:ubuntu:bare:build && docker run --rm -it -w /root md:bare-ubuntu",
+    "docker:fedora:bare:shell": "deno task docker:fedora:bare:build && docker run --rm -it -w /root md:bare-fedora",
+    "docker:ubuntu:bare:install": "deno task docker:ubuntu:bare:build && docker run --rm -w /root md:bare-ubuntu bash -lc 'curl -fsSL https://raw.githubusercontent.com/wcygan/mini-dotfiles/refs/heads/main/install.sh | sh'",
+    "docker:fedora:bare:install": "deno task docker:fedora:bare:build && docker run --rm -w /root md:bare-fedora bash -lc 'curl -fsSL https://raw.githubusercontent.com/wcygan/mini-dotfiles/refs/heads/main/install.sh | sh'",
+    "test:all": "deno task test:mac && deno task docker:ubuntu:test && deno task docker:fedora:test"
   }
 }

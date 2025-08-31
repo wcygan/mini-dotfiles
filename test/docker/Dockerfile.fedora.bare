@@ -1,0 +1,11 @@
+FROM fedora:40
+
+# Minimal tools to fetch and run the installer and allow HTTPS cloning
+RUN dnf -y install \
+  bash zsh git curl unzip jq diffutils ca-certificates \
+  && dnf clean all \
+  && git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+# Start in an interactive bash by default
+CMD ["/bin/bash", "-l"]
+
