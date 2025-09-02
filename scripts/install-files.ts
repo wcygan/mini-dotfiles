@@ -1,8 +1,9 @@
 #!/usr/bin/env -S deno run --allow-all
 
 import $ from "jsr:@david/dax";
-import { dirname, join } from "jsr:@std/path";
+import { dirname } from "jsr:@std/path";
 import { log } from "./log.ts";
+import { getFileMappings } from "./files.ts";
 
 const STEP = "install-files";
 
@@ -29,21 +30,10 @@ await log.stepBegin(STEP);
 try {
   const home = Deno.env.get("HOME");
   if (!home) throw new Error("HOME not set");
-
-  const repo = Deno.cwd();
-  const configDir = Deno.env.get("XDG_CONFIG_HOME") ?? join(home, ".config");
-  const mapping: Array<[string, string]> = [
-    [join(repo, "dotfiles", "bashrc"), join(home, ".bashrc")],
-    [join(repo, "dotfiles", "bash_profile"), join(home, ".bash_profile")],
-    [join(repo, "dotfiles", "zshrc"), join(home, ".zshrc")],
-    [join(repo, "dotfiles", "gitconfig"), join(home, ".gitconfig")],
-    [join(repo, "dotfiles", "tmux.conf"), join(home, ".tmux.conf")],
-    [join(repo, "dotfiles", "aliases.sh"), join(home, ".aliases.sh")],
-    [join(repo, "dotfiles", "starship.toml"), join(configDir, "starship.toml")],
-  ];
+  const mapping = getFileMappings();
 
   await log.info(STEP, "copying dotfiles…");
-  for (const [src, dst] of mapping) {
+  for (const { src, dst } of mapping) {
     await log.debug(STEP, `link ${dst} -> ${src}`);
     await ensureSymlink(src, dst);
   }
