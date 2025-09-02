@@ -78,6 +78,28 @@ ensure_deno() {
   fi
 
   echo "Deno not found. Installing..."
+  # Ensure unzip is available on Ubuntu/Fedora (needed by Deno installer)
+  if ! command -v unzip >/dev/null 2>&1; then
+    if [ -f /etc/os-release ]; then
+      # shellcheck disable=SC1091
+      . /etc/os-release
+      SUDO=""
+      if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
+        SUDO="sudo"
+      fi
+      case "${ID:-}" in
+        ubuntu)
+          echo "Installing unzip via apt (Ubuntu)…"
+          $SUDO apt-get update
+          $SUDO apt-get install -y unzip
+          ;;
+        fedora)
+          echo "Installing unzip via dnf (Fedora)…"
+          $SUDO dnf install -y unzip
+          ;;
+      esac
+    fi
+  fi
   # Use non-interactive install and avoid modifying shell profiles here.
   # We manage PATH via our dotfiles; see dotfiles/bashrc and dotfiles/zshrc.
   curl -fsSL https://deno.land/install.sh | sh -s -- -y --no-modify-path
