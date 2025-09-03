@@ -31,6 +31,10 @@ alias dt='deno task'
 alias vi='nvim'
 alias vim='nvim'
 alias lg='lazygit'
+alias gs='git status'
+
+alias lfg='codex --dangerously-bypass-approvals-and-sandbox'
+alias lfgc='claude --model opus --dangerously-skip-permissions'
 
 # Reload current shell as login to re-source rc files
 function reload
