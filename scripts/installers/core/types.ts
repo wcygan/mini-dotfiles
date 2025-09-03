@@ -40,13 +40,36 @@ export async function detectOS(): Promise<OS> {
   if (Deno.build.os === "linux") {
     try {
       const txt = await Deno.readTextFile("/etc/os-release");
-      const id = (txt.match(/^ID=(.*)$/m)?.[1] ?? "").replace(/"/g, "").trim();
-      if (id === "ubuntu" || id === "debian") return "ubuntu";
-      if (id === "fedora") return "fedora";
+      const id = (txt.match(/^ID=(.*)$/m)?.[1] ?? "")
+        .replace(/"/g, "")
+        .trim()
+        .toLowerCase();
+      const idLikeRaw = (txt.match(/^ID_LIKE=(.*)$/m)?.[1] ?? "")
+        .replace(/"/g, "")
+        .trim()
+        .toLowerCase();
+      const idLikes = idLikeRaw.split(/\s+/).filter(Boolean);
+
+      // Fedora family: fedora variants (e.g., fedora-asahi-remix), RHEL clones use dnf
+      const isFedoraFamily =
+        id.includes("fedora") ||
+        idLikes.includes("fedora") ||
+        idLikes.includes("rhel") ||
+        idLikes.includes("centos") ||
+        idLikes.includes("rocky") ||
+        idLikes.includes("almalinux");
+      if (isFedoraFamily) return "fedora";
+
+      // Debian/Ubuntu family
+      const isDebianFamily =
+        id === "ubuntu" ||
+        id === "debian" ||
+        idLikes.includes("ubuntu") ||
+        idLikes.includes("debian");
+      if (isDebianFamily) return "ubuntu";
     } catch {
       // ignore
     }
   }
   return "ubuntu";
 }
-
