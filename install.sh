@@ -110,11 +110,49 @@ ensure_deno() {
   fi
 }
 
+set_default_shell_to_fish() {
+  # Find fish binary
+  FISH="$(PATH="$HOME/.local/bin:$HOME/.deno/bin:$PATH" command -v fish 2>/dev/null || true)"
+  if [ -z "$FISH" ]; then
+    # Fish not installed; nothing to do
+    return 0
+  fi
+
+  # Ensure listed in /etc/shells
+  if ! grep -qx "$FISH" /etc/shells 2>/dev/null; then
+    if [ -w /etc/shells ]; then
+      echo "$FISH" >> /etc/shells
+    elif command -v sudo >/dev/null 2>&1; then
+      echo "$FISH" | sudo tee -a /etc/shells >/dev/null || true
+    fi
+  fi
+
+  # Detect current login shell
+  CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk 'NR==1{print $2}' || printf %s "${SHELL:-}")"
+  if [ "$CURRENT_SHELL" = "$FISH" ]; then
+    echo "Default shell already fish; no change needed."
+    return 0
+  fi
+
+  if chsh -s "$FISH" 2>/dev/null; then
+    echo "Default shell changed to: $FISH"
+    return 0
+  fi
+  if command -v sudo >/dev/null 2>&1 && sudo chsh -s "$FISH" "$USER" 2>/dev/null; then
+    echo "Default shell changed to: $FISH (sudo)"
+    return 0
+  fi
+  echo "Could not change default shell automatically; you can run: chsh -s '$FISH'" >&2
+}
+
 
 main() {
   ensure_in_repo
   ensure_deno
   deno task install
+
+  # Always attempt to set default shell to fish when available (idempotent)
+  set_default_shell_to_fish || true
 
   # Post-install: optional auto-reload of the current shell (opt-in)
   # Use DOTFILES_RELOAD=1 to replace the current shell with a login shell.
@@ -133,6 +171,7 @@ main() {
   case "${SHELL:-}" in
     *bash) echo "  bash:    exec bash -l    (# or: source ~/.bashrc)" ;;
     *zsh)  echo "  zsh:     exec zsh -l     (# or: source ~/.zshrc)" ;;
+    *fish) echo "  fish:    exec fish -l    (# Fish auto-loads config.fish)" ;;
   esac
 }
 

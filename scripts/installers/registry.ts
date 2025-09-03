@@ -23,6 +23,9 @@ import { JqMacInstaller } from "./mac/jq.ts";
 import { BatMacInstaller } from "./mac/bat.ts";
 import { FdMacInstaller } from "./mac/fd.ts";
 import { NeovimMacInstaller } from "./mac/neovim.ts";
+import { FishUbuntuInstaller } from "./ubuntu/fish.ts";
+import { FishFedoraInstaller } from "./fedora/fish.ts";
+import { FishMacInstaller } from "./mac/fish.ts";
 
 export function installersFor(os: OS) {
   switch (os) {
@@ -32,6 +35,7 @@ export function installersFor(os: OS) {
         new BatUbuntuInstaller(),
         new FdUbuntuInstaller(),
         new NeovimUbuntuInstaller(),
+        new FishUbuntuInstaller(),
         new FzfUbuntuInstaller(),
         new StarshipUbuntuInstaller(),
         new LazyGitUbuntuInstaller(),
@@ -42,6 +46,7 @@ export function installersFor(os: OS) {
         new BatFedoraInstaller(),
         new FdFedoraInstaller(),
         new NeovimFedoraInstaller(),
+        new FishFedoraInstaller(),
         new FzfFedoraInstaller(),
         new StarshipFedoraInstaller(),
         new LazyGitFedoraInstaller(),
@@ -52,6 +57,7 @@ export function installersFor(os: OS) {
         new BatMacInstaller(),
         new FdMacInstaller(),
         new NeovimMacInstaller(),
+        new FishMacInstaller(),
         new FzfMacInstaller(),
         new StarshipMacInstaller(),
         new LazyGitMacInstaller(),
