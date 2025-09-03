@@ -5,8 +5,11 @@ export async function cmdExists(cmd: string): Promise<boolean> {
   try {
     const extraPaths = [binDir(), join(homeDir(), ".fzf", "bin")];
     const current = Deno.env.get("PATH") ?? "";
-    const path = [...extraPaths, ...current.split(":").filter(Boolean)].join(":");
-    await $`sh -lc 'command -v ${cmd} >/dev/null 2>&1'`.env({ PATH: path }).quiet();
+    const path = [...extraPaths, ...current.split(":").filter(Boolean)].join(
+      ":",
+    );
+    await $`sh -lc 'command -v ${cmd} >/dev/null 2>&1'`.env({ PATH: path })
+      .quiet();
     return true;
   } catch {
     return false;
@@ -55,6 +58,11 @@ export function safePATH(): string {
   const current = (Deno.env.get("PATH") ?? "").split(":").filter(Boolean);
   const parts: string[] = [];
   const seen = new Set<string>();
-  for (const p of [...systemFirst, ...current]) if (!seen.has(p)) { parts.push(p); seen.add(p); }
+  for (const p of [...systemFirst, ...current]) {
+    if (!seen.has(p)) {
+      parts.push(p);
+      seen.add(p);
+    }
+  }
   return parts.join(":");
 }

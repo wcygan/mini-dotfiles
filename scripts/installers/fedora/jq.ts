@@ -13,4 +13,3 @@ export class JqFedoraInstaller extends FedoraInstaller {
     if (!(await cmdExists("jq"))) throw new Error("verify: jq missing on PATH");
   }
 }
-

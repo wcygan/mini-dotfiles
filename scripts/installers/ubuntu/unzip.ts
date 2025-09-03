@@ -11,7 +11,8 @@ export class UnzipUbuntuInstaller extends UbuntuInstaller {
   }
 
   async post() {
-    if (!(await cmdExists("unzip"))) throw new Error("verify: unzip missing on PATH");
+    if (!(await cmdExists("unzip"))) {
+      throw new Error("verify: unzip missing on PATH");
+    }
   }
 }
-

@@ -5,7 +5,9 @@ import { join } from "jsr:@std/path";
 export class BatUbuntuInstaller extends UbuntuInstaller {
   readonly name = "bat-ubuntu";
 
-  async pre() { await ensureDir(binDir()); }
+  async pre() {
+    await ensureDir(binDir());
+  }
 
   async run() {
     // On Debian/Ubuntu the binary is "batcat" in the "bat" package.
@@ -24,7 +26,8 @@ export class BatUbuntuInstaller extends UbuntuInstaller {
         await Deno.symlink(target, dst);
       }
     } catch {}
-    if (!(await cmdExists("bat"))) throw new Error("verify: bat missing on PATH");
+    if (!(await cmdExists("bat"))) {
+      throw new Error("verify: bat missing on PATH");
+    }
   }
 }
-

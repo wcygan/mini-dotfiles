@@ -5,7 +5,9 @@ import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
 export class StarshipFedoraInstaller extends FedoraInstaller {
   readonly name = "starship-fedora";
 
-  override async pre() { await ensureDir(binDir()); }
+  override async pre() {
+    await ensureDir(binDir());
+  }
 
   async run() {
     if (await cmdExists("starship")) {
@@ -18,6 +20,8 @@ export class StarshipFedoraInstaller extends FedoraInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("starship"))) throw new Error("verify: starship missing on PATH");
+    if (!(await cmdExists("starship"))) {
+      throw new Error("verify: starship missing on PATH");
+    }
   }
 }

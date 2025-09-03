@@ -18,4 +18,3 @@ export class FdFedoraInstaller extends FedoraInstaller {
     if (!(await cmdExists("fd"))) throw new Error("verify: fd missing on PATH");
   }
 }
-

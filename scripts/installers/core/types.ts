@@ -51,8 +51,7 @@ export async function detectOS(): Promise<OS> {
       const idLikes = idLikeRaw.split(/\s+/).filter(Boolean);
 
       // Fedora family: fedora variants (e.g., fedora-asahi-remix), RHEL clones use dnf
-      const isFedoraFamily =
-        id.includes("fedora") ||
+      const isFedoraFamily = id.includes("fedora") ||
         idLikes.includes("fedora") ||
         idLikes.includes("rhel") ||
         idLikes.includes("centos") ||
@@ -61,8 +60,7 @@ export async function detectOS(): Promise<OS> {
       if (isFedoraFamily) return "fedora";
 
       // Debian/Ubuntu family
-      const isDebianFamily =
-        id === "ubuntu" ||
+      const isDebianFamily = id === "ubuntu" ||
         id === "debian" ||
         idLikes.includes("ubuntu") ||
         idLikes.includes("debian");

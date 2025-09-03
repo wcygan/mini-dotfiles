@@ -1,6 +1,6 @@
 import $ from "jsr:@david/dax";
 import { join } from "jsr:@std/path";
-import { binDir, cmdExists, homeDir } from "./utils.ts";
+import { binDir, cmdExists, homeDir, runSudo } from "./utils.ts";
 
 export async function ensureUpstreamFzf(noUpdateRc = true) {
   const fzfDir = join(homeDir(), ".fzf");
@@ -13,15 +13,17 @@ export async function ensureUpstreamFzf(noUpdateRc = true) {
     await $`test -d ${fzfDir}`.quiet();
     await $`git -C ${fzfDir} pull --ff-only`.quiet();
   } catch {
-    try { await $`rm -rf ${fzfDir}`.quiet(); } catch {}
+    try {
+      await $`rm -rf ${fzfDir}`.quiet();
+    } catch {}
     await $`git clone --depth 1 https://github.com/junegunn/fzf.git ${fzfDir}`;
   }
   await $`${join(fzfDir, "install")} ${installFlags}`;
 }
 
 export async function installTarballBinary(opts: {
-  url: string;      // final URL (versioned or latest/download/...)
-  binName: string;  // executable name inside extracted tarball
+  url: string; // final URL (versioned or latest/download/...)
+  binName: string; // executable name inside extracted tarball
   dstName?: string; // optional rename at destination
 }) {
   const tmp = await Deno.makeTempDir();
@@ -29,14 +31,59 @@ export async function installTarballBinary(opts: {
   await $`curl -fsSL -o ${tgz} ${opts.url}`;
   await $`tar -xzf ${tgz} -C ${tmp}`;
   const src = join(tmp, opts.binName);
-  try { await Deno.chmod(src, 0o755); } catch {}
+  try {
+    await Deno.chmod(src, 0o755);
+  } catch {}
   const dst = join(binDir(), opts.dstName ?? opts.binName);
-  try { await Deno.remove(dst); } catch {}
+  try {
+    await Deno.remove(dst);
+  } catch {}
   await Deno.rename(src, dst);
 }
 
-export function ghLatestRedirect(repo: string): Promise<string> {
+export async function ghLatestRedirect(repo: string): Promise<string> {
   // Returns the effective URL of .../releases/latest after redirects, e.g. .../tag/v0.54.2
-  return $`sh -lc 'curl -Ls -o /dev/null -w %\{url_effective\} https://github.com/${repo}/releases/latest'`
-    .quiet().then(r => r.stdout.trim());
+  const r =
+    await $`sh -lc 'curl -Ls -o /dev/null -w %\{url_effective\} https://github.com/${repo}/releases/latest'`
+      .quiet();
+  return r.stdout.trim();
+}
+
+// Ensures the given shell is the user's default login shell.
+// - Resolves path via `command -v <shellCmd>`
+// - Adds to /etc/shells (via sudo) if missing
+// - Runs chsh for current user if different
+// Returns the resolved path and whether a change was performed.
+export async function ensureDefaultShell(
+  shellCmd: string,
+): Promise<{ path: string; changed: boolean }> {
+  const { stdout } = await $`sh -lc 'command -v ${shellCmd}'`.quiet();
+  const shellPath = stdout.trim();
+  if (!shellPath) throw new Error(`${shellCmd} not found on PATH`);
+
+  try {
+    await runSudo(
+      `sh -lc 'grep -qx ${shellPath} /etc/shells || echo ${shellPath} >> /etc/shells'`,
+    );
+  } catch {
+    // best-effort: ignore inability to update /etc/shells
+  }
+
+  const cur =
+    await $`sh -lc 'getent passwd "$USER" 2>/dev/null | cut -d: -f7 || dscl . -read /Users/$(whoami) UserShell 2>/dev/null | awk "NR==1{print $2}" || printf %s "$SHELL"'`
+      .quiet();
+  const currentShell = cur.stdout.trim();
+  if (currentShell === shellPath) return { path: shellPath, changed: false };
+
+  try {
+    await $`chsh -s ${shellPath}`.quiet();
+    return { path: shellPath, changed: true };
+  } catch {
+    try {
+      await runSudo(`chsh -s ${shellPath} $USER`);
+      return { path: shellPath, changed: true };
+    } catch {
+      return { path: shellPath, changed: false };
+    }
+  }
 }

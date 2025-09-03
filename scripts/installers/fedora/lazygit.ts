@@ -1,12 +1,14 @@
 import { FedoraInstaller } from "./base.ts";
 import { binDir, cmdExists, ensureDir, runSudo } from "../core/utils.ts";
 import $ from "jsr:@david/dax";
-import { installTarballBinary, ghLatestRedirect } from "../core/toolkit.ts";
+import { ghLatestRedirect, installTarballBinary } from "../core/toolkit.ts";
 
 export class LazyGitFedoraInstaller extends FedoraInstaller {
   readonly name = "lazygit-fedora";
 
-  override async pre() { await ensureDir(binDir()); }
+  override async pre() {
+    await ensureDir(binDir());
+  }
 
   async run() {
     if (await cmdExists("lazygit")) {
@@ -29,9 +31,11 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       }
     }
 
-    const arch = Deno.build.arch === "x86_64" ? "x86_64"
-              : Deno.build.arch === "aarch64" ? "arm64"
-              : "";
+    const arch = Deno.build.arch === "x86_64"
+      ? "x86_64"
+      : Deno.build.arch === "aarch64"
+      ? "arm64"
+      : "";
     if (!arch) throw new Error(`unsupported arch ${Deno.build.arch}`);
     const eff = await ghLatestRedirect("jesseduffield/lazygit");
     const tag = eff.split("/").pop() ?? ""; // e.g., v0.54.2
@@ -39,9 +43,12 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
     const verUrl = version
       ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_Linux_${arch}.tar.gz`
       : "";
-    const latestUrl = `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_Linux_${arch}.tar.gz`;
+    const latestUrl =
+      `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_Linux_${arch}.tar.gz`;
     try {
-      await this.info(`lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`);
+      await this.info(
+        `lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`,
+      );
       if (verUrl) await this.info(`trying url: ${verUrl}`);
       if (verUrl) {
         await installTarballBinary({ url: verUrl, binName: "lazygit" });
@@ -56,6 +63,8 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("lazygit"))) throw new Error("verify: lazygit missing on PATH");
+    if (!(await cmdExists("lazygit"))) {
+      throw new Error("verify: lazygit missing on PATH");
+    }
   }
 }

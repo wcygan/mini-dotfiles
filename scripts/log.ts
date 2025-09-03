@@ -208,18 +208,18 @@ export type Logger = typeof log;
 
 // Optional: create a scoped logger bound to a step
 export type Scoped = {
-  info:    (msg: string) => Promise<void>;
-  warn:    (msg: string) => Promise<void>;
-  error:   (msg: string) => Promise<void>;
+  info: (msg: string) => Promise<void>;
+  warn: (msg: string) => Promise<void>;
+  error: (msg: string) => Promise<void>;
   success: (msg: string) => Promise<void>;
-  debug:   (msg: string) => Promise<void>;
+  debug: (msg: string) => Promise<void>;
 };
 export function scoped(step: string): Scoped {
   return {
-    info:    (m) => log.info(step, m),
-    warn:    (m) => log.warn(step, m),
-    error:   (m) => log.error(step, m),
+    info: (m) => log.info(step, m),
+    warn: (m) => log.warn(step, m),
+    error: (m) => log.error(step, m),
     success: (m) => log.success(step, m),
-    debug:   (m) => log.debug(step, m),
+    debug: (m) => log.debug(step, m),
   };
 }

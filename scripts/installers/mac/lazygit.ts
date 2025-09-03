@@ -9,10 +9,14 @@ export class LazyGitMacInstaller extends MacInstaller {
       await this.info("lazygit already installed; skipping");
       return;
     }
-    if (!(await this.brewInstalled("lazygit"))) await this.brewInstall("lazygit");
+    if (!(await this.brewInstalled("lazygit"))) {
+      await this.brewInstall("lazygit");
+    }
   }
 
   override async post() {
-    if (!(await cmdExists("lazygit"))) throw new Error("verify: lazygit missing on PATH");
+    if (!(await cmdExists("lazygit"))) {
+      throw new Error("verify: lazygit missing on PATH");
+    }
   }
 }

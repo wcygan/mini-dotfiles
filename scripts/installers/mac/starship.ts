@@ -9,10 +9,14 @@ export class StarshipMacInstaller extends MacInstaller {
       await this.info("starship already installed; skipping");
       return;
     }
-    if (!(await this.brewInstalled("starship"))) await this.brewInstall("starship");
+    if (!(await this.brewInstalled("starship"))) {
+      await this.brewInstall("starship");
+    }
   }
 
   override async post() {
-    if (!(await cmdExists("starship"))) throw new Error("verify: starship missing on PATH");
+    if (!(await cmdExists("starship"))) {
+      throw new Error("verify: starship missing on PATH");
+    }
   }
 }

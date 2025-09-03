@@ -5,7 +5,9 @@ import { join } from "jsr:@std/path";
 export class FdUbuntuInstaller extends UbuntuInstaller {
   readonly name = "fd-ubuntu";
 
-  async pre() { await ensureDir(binDir()); }
+  async pre() {
+    await ensureDir(binDir());
+  }
 
   async run() {
     // On Debian/Ubuntu the package is "fd-find" and the binary is "fdfind".
@@ -28,7 +30,7 @@ export class FdUbuntuInstaller extends UbuntuInstaller {
 }
 
 async function which(cmd: string): Promise<string> {
-  const p = new Deno.Command("sh", { args: ["-lc", `command -v ${cmd}`] }).outputSync();
+  const p = new Deno.Command("sh", { args: ["-lc", `command -v ${cmd}`] })
+    .outputSync();
   return new TextDecoder().decode(p.stdout).trim();
 }
-

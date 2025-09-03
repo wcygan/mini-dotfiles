@@ -5,7 +5,9 @@ import { ensureUpstreamFzf } from "../core/toolkit.ts";
 export class FzfUbuntuInstaller extends UbuntuInstaller {
   readonly name = "fzf-ubuntu";
 
-  override async pre() { await ensureDir(binDir()); }
+  override async pre() {
+    await ensureDir(binDir());
+  }
 
   override async run() {
     if (await cmdExists("fzf")) return;
@@ -20,6 +22,8 @@ export class FzfUbuntuInstaller extends UbuntuInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("fzf"))) throw new Error("verify: fzf missing on PATH");
+    if (!(await cmdExists("fzf"))) {
+      throw new Error("verify: fzf missing on PATH");
+    }
   }
 }

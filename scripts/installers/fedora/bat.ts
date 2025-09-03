@@ -10,7 +10,8 @@ export class BatFedoraInstaller extends FedoraInstaller {
   }
 
   async post() {
-    if (!(await cmdExists("bat"))) throw new Error("verify: bat missing on PATH");
+    if (!(await cmdExists("bat"))) {
+      throw new Error("verify: bat missing on PATH");
+    }
   }
 }
-

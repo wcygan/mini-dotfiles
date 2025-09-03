@@ -15,6 +15,8 @@ export class FzfMacInstaller extends MacInstaller {
   }
 
   override async post() {
-    if (!(await cmdExists("fzf"))) throw new Error("verify: fzf missing on PATH");
+    if (!(await cmdExists("fzf"))) {
+      throw new Error("verify: fzf missing on PATH");
+    }
   }
 }

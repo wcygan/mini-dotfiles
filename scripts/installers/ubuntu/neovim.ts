@@ -11,7 +11,8 @@ export class NeovimUbuntuInstaller extends UbuntuInstaller {
   }
 
   async post() {
-    if (!(await cmdExists("nvim"))) throw new Error("verify: nvim missing on PATH");
+    if (!(await cmdExists("nvim"))) {
+      throw new Error("verify: nvim missing on PATH");
+    }
   }
 }
-

@@ -14,4 +14,3 @@ export class JqUbuntuInstaller extends UbuntuInstaller {
     if (!(await cmdExists("jq"))) throw new Error("verify: jq missing on PATH");
   }
 }
-
