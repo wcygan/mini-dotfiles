@@ -28,5 +28,5 @@ alias gca='git commit --amend --no-edit'
 alias lg='lazygit'
 
 # Editors
-alias vi='nvim'
+alias nv='nvim'
 alias vim='nvim'

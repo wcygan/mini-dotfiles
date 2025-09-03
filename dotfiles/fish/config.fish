@@ -16,6 +16,10 @@ __add_path_safe "$HOME/.deno/bin"
 __add_path_safe "$HOME/.local/bin"
 __add_path_safe "$HOME/.fzf/bin"
 
+# Nix (multi-user and per-user profiles)
+__add_path_safe "/nix/var/nix/profiles/default/bin"
+__add_path_safe "$HOME/.nix-profile/bin"
+
 # Homebrew (macOS) common locations
 __add_path_safe "/opt/homebrew/bin"
 __add_path_safe "/opt/homebrew/sbin"
@@ -31,7 +35,15 @@ alias dt='deno task'
 alias vi='nvim'
 alias vim='nvim'
 alias lg='lazygit'
+alias gaa='git add .'
+alias gb='git branch'
 alias gs='git status'
+alias gd='git diff'
+alias gco='git checkout'
+alias gcm='git commit'
+alias gpr='git pull --rebase'
+alias gp='git push'
+alias nv='nvim'
 
 alias lfg='codex --dangerously-bypass-approvals-and-sandbox'
 alias lfgc='claude --model opus --dangerously-skip-permissions'
@@ -90,4 +102,3 @@ set -gx VISUAL nvim
 if command -vq bat
     set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
 end
-
