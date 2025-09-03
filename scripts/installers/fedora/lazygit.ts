@@ -1,5 +1,5 @@
 import { FedoraInstaller } from "./base.ts";
-import { binDir, cmdExists, ensureDir } from "../core/utils.ts";
+import { binDir, cmdExists, ensureDir, runSudo } from "../core/utils.ts";
 import $ from "jsr:@david/dax";
 import { installTarballBinary, ghLatestRedirect } from "../core/toolkit.ts";
 
@@ -21,7 +21,7 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
       // not in default repos, try COPR
       try {
         await this.dnfInstall("dnf-plugins-core");
-        await $`dnf -y copr enable atim/lazygit`;
+        await runSudo("dnf -y copr enable atim/lazygit");
         await this.dnfInstall("lazygit");
         return;
       } catch {
@@ -37,9 +37,9 @@ export class LazyGitFedoraInstaller extends FedoraInstaller {
     const tag = eff.split("/").pop() ?? ""; // e.g., v0.54.2
     const version = tag.replace(/^v/, "");
     const verUrl = version
-      ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_linux_${arch}.tar.gz`
+      ? `https://github.com/jesseduffield/lazygit/releases/download/${tag}/lazygit_${version}_Linux_${arch}.tar.gz`
       : "";
-    const latestUrl = `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_linux_${arch}.tar.gz`;
+    const latestUrl = `https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_Linux_${arch}.tar.gz`;
     try {
       await this.info(`lazygit arch=${Deno.build.arch} mapped=${arch} tag=${tag}`);
       if (verUrl) await this.info(`trying url: ${verUrl}`);
